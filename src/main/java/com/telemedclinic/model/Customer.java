@@ -1,20 +1,60 @@
 package com.telemedclinic.model;
 
-public class Customer {
+import jakarta.persistence.Entity;
 
-    private String name;
+@Entity
+public class Customer extends User {
 
-    public Customer() {}
+    // Attributes
+    private String address;
 
-    public Customer(String name) {
-        this.name = name;
+
+    // No-args constructor for JPA
+    public Customer() {
     }
 
-    public String getName() {
-        return name;
+
+    // Constructor
+    public Customer(
+            String name,
+            String email,
+            String password,
+            String phoneNumber,
+            String address
+    ) {
+
+        super(
+                name,
+                email,
+                password,
+                phoneNumber
+        );
+
+        setAddress(address);
     }
 
-    public void setName(String name) {
-        this.name = name;
+
+    // Getter
+    public String getAddress() {
+        return address;
+    }
+
+
+    // Setter
+    public void setAddress(String address) {
+
+        if (address == null || address.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Address cannot be empty."
+            );
+        }
+
+        this.address = address;
+    }
+
+
+    // Behavior methods
+    public void updateAddress(String address) {
+        setAddress(address);
     }
 }

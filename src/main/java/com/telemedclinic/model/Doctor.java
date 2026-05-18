@@ -1,20 +1,81 @@
 package com.telemedclinic.model;
 
-public class Doctor {
+import jakarta.persistence.Entity;
 
-    private String name;
+@Entity
+public class Doctor extends User {
 
-    public Doctor() {}
+    // Attributes
+    private String specialization;
+    private String licenseNumber;
 
-    public Doctor(String name) {
-        this.name = name;
+
+    // No-args constructor for JPA
+    public Doctor() {
     }
 
-    public String getName() {
-        return name;
+
+    // Constructor
+    public Doctor(
+            String name,
+            String email,
+            String password,
+            String phoneNumber,
+            String specialization,
+            String licenseNumber
+    ) {
+
+        super(
+                name,
+                email,
+                password,
+                phoneNumber
+        );
+
+        setSpecialization(specialization);
+        setLicenseNumber(licenseNumber);
     }
 
-    public void setName(String name) {
-        this.name = name;
+
+    // Getter
+    public String getSpecialization() {
+        return specialization;
+    }
+
+    public String getLicenseNumber() {
+        return licenseNumber;
+    }
+
+
+    // Setter
+    public void setSpecialization(String specialization) {
+
+        if (specialization == null || specialization.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Specialization cannot be empty."
+            );
+        }
+
+        this.specialization = specialization;
+    }
+
+    public void setLicenseNumber(String licenseNumber) {
+
+        if (licenseNumber == null || licenseNumber.isBlank()) {
+            throw new IllegalArgumentException(
+                    "License number cannot be empty."
+            );
+        }
+
+        this.licenseNumber = licenseNumber;
+    }
+
+
+    // Behavior methods
+    public boolean isSpecialist(String specialization) {
+
+        return this.specialization.equalsIgnoreCase(
+                specialization
+        );
     }
 }
