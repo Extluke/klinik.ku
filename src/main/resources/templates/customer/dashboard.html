@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Customer - KlinikKu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>* { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+</head>
+<body class="bg-[#FDF3F0] min-h-screen px-4 py-8">
+    <main class="bg-white max-w-2xl mx-auto shadow-xl rounded-2xl p-8">
+        <h1 class="text-2xl font-bold text-stone-900">Dashboard Customer</h1>
+        <p class="text-stone-500 mt-2">
+            Selamat datang, <span th:text="${customerName}">Customer</span>.
+        </p>
+
+        <div class="border border-stone-200 rounded-xl p-4 mt-6">
+            <p class="text-sm text-stone-500">Email akun</p>
+            <p class="font-semibold text-stone-900" th:text="${customerEmail}">customer@email.com</p>
+        </div>
+
+        <form th:action="@{/auth/logout}" method="post" class="mt-6">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit"
+                    class="bg-[#D53E0F] hover:bg-[#5E0006] text-white font-semibold px-4 py-2.5 rounded-xl text-sm">
+                Logout
+            </button>
+        </form>
+    </main>
+</body>
+</html>
