@@ -11,8 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.telemedclinic.dto.AuthResponse;
 import com.telemedclinic.dto.CreatePharmacistAccountRequest;
+import com.telemedclinic.dto.DoctorRegisterRequest;
+import com.telemedclinic.dto.DoctorResponse;
 import com.telemedclinic.dto.PharmacyRegisterRequest;
 import com.telemedclinic.dto.PharmacyResponse;
+import com.telemedclinic.model.Doctor;
 import com.telemedclinic.model.Pharmacy;
 import com.telemedclinic.service.AuthService;
 import com.telemedclinic.service.PharmacyService;
@@ -31,6 +34,38 @@ public class AdminController {
 
         this.authService = authService;
         this.pharmacyService = pharmacyService;
+    }
+
+    @PostMapping("/doctors")
+    public ResponseEntity<DoctorResponse> registerDoctor(
+            @RequestBody DoctorRegisterRequest request
+    ) {
+
+        Doctor doctor = authService.registerDoctor(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new DoctorResponse(doctor));
+    }
+
+    @PatchMapping("/doctors/{doctorId}/approve")
+    public ResponseEntity<DoctorResponse> approveDoctor(
+            @PathVariable Long doctorId
+    ) {
+
+        return ResponseEntity.ok(
+                new DoctorResponse(authService.approveDoctor(doctorId))
+        );
+    }
+
+    @PatchMapping("/doctors/{doctorId}/decline")
+    public ResponseEntity<DoctorResponse> declineDoctor(
+            @PathVariable Long doctorId
+    ) {
+
+        return ResponseEntity.ok(
+                new DoctorResponse(authService.declineDoctor(doctorId))
+        );
     }
 
     @PostMapping("/pharmacies")
@@ -53,6 +88,39 @@ public class AdminController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(authService.createPharmacistAccount(request));
+    }
+
+    @PostMapping("/pharmacies/{pharmacyId}/pharmacists")
+    public ResponseEntity<AuthResponse> createPharmacistAccountForPharmacy(
+            @PathVariable Long pharmacyId,
+            @RequestBody CreatePharmacistAccountRequest request
+    ) {
+
+        request.setPharmacyId(pharmacyId);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(authService.createPharmacistAccount(request));
+    }
+
+    @PatchMapping("/pharmacies/{pharmacyId}/approve")
+    public ResponseEntity<PharmacyResponse> approvePharmacy(
+            @PathVariable Long pharmacyId
+    ) {
+
+        return ResponseEntity.ok(
+                new PharmacyResponse(pharmacyService.approvePharmacy(pharmacyId))
+        );
+    }
+
+    @PatchMapping("/pharmacies/{pharmacyId}/decline")
+    public ResponseEntity<PharmacyResponse> declinePharmacy(
+            @PathVariable Long pharmacyId
+    ) {
+
+        return ResponseEntity.ok(
+                new PharmacyResponse(pharmacyService.declinePharmacy(pharmacyId))
+        );
     }
 
     @PatchMapping("/pharmacies/{pharmacyId}/activate")

@@ -1,0 +1,61 @@
+<!-- Fragment: navbar -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="navbar" class="sticky top-0 z-50 bg-white border-b border-stone-200 shadow-sm">
+  <div class="py-4 px-6 md:px-12 flex justify-between items-center max-w-7xl mx-auto">
+    <!-- Logo -->
+    <a th:href="@{/}" class="flex items-center">
+      <div class="bg-[#FAD5C8] w-8 h-8 rounded-full flex items-center justify-center">
+        <svg class="w-4 h-4 text-[#D53E0F]" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+        </svg>
+      </div>
+      <span class="font-bold text-stone-900 text-xl ml-2">KlinikKu</span>
+    </a>
+
+    <!-- Menu Desktop -->
+    <div class="hidden md:flex gap-8">
+      <a th:href="@{/}" class="text-sm text-stone-600 hover:text-[#D53E0F] font-medium transition-colors">Beranda</a>
+      <a th:href="@{/#layanan}" class="text-sm text-stone-600 hover:text-[#D53E0F] font-medium transition-colors">Layanan</a>
+      <a th:href="@{/#dokter}" class="text-sm text-stone-600 hover:text-[#D53E0F] font-medium transition-colors">Dokter</a>
+      <a th:href="@{/#apotek}" class="text-sm text-stone-600 hover:text-[#D53E0F] font-medium transition-colors">Apotek</a>
+    </div>
+
+    <!-- Tombol Auth Desktop -->
+    <div class="hidden md:flex items-center gap-2">
+      <a th:href="@{/auth/login}" class="border border-[#D53E0F] text-[#D53E0F] hover:bg-[#FDF3F0] font-semibold text-sm px-4 py-2 rounded-xl transition-colors">Masuk</a>
+      <a th:href="@{/auth/register}" class="bg-[#D53E0F] hover:bg-[#5E0006] text-white font-semibold text-sm px-4 py-2 rounded-xl transition-colors">Daftar</a>
+    </div>
+
+    <!-- Hamburger Button Mobile -->
+    <button id="hamburgerBtn" class="md:hidden">
+      <svg class="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobileMenu" class="hidden bg-white border-t border-stone-200 px-6 py-4 md:hidden">
+    <div class="flex flex-col gap-4">
+      <a th:href="@{/}" class="text-sm text-stone-600 hover:text-[#D53E0F] font-medium transition-colors">Beranda</a>
+      <a th:href="@{/#layanan}" class="text-sm text-stone-600 hover:text-[#D53E0F] font-medium transition-colors">Layanan</a>
+      <a th:href="@{/#dokter}" class="text-sm text-stone-600 hover:text-[#D53E0F] font-medium transition-colors">Dokter</a>
+      <a th:href="@{/#apotek}" class="text-sm text-stone-600 hover:text-[#D53E0F] font-medium transition-colors">Apotek</a>
+      <div class="flex flex-col gap-2 mt-2">
+        <a th:href="@{/auth/login}" class="border border-[#D53E0F] text-[#D53E0F] w-full text-center py-2 rounded-xl font-semibold text-sm hover:bg-[#FDF3F0] transition-colors">Masuk</a>
+        <a th:href="@{/auth/register}" class="bg-[#D53E0F] text-white w-full text-center py-2 rounded-xl font-semibold text-sm hover:bg-[#5E0006] transition-colors">Daftar</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+  document.getElementById('hamburgerBtn').addEventListener('click', function() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+  });
+</script>
+</body>
+</html>

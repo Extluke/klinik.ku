@@ -5,6 +5,7 @@ public class PharmacyRegisterRequest {
     private String name;
     private String address;
     private String phoneNumber;
+    private String legalDocumentNumber;
     private double latitude;
     private double longitude;
 
@@ -15,6 +16,7 @@ public class PharmacyRegisterRequest {
             String name,
             String address,
             String phoneNumber,
+            String legalDocumentNumber,
             double latitude,
             double longitude
     ) {
@@ -22,6 +24,7 @@ public class PharmacyRegisterRequest {
         this.name = name;
         this.address = address;
         this.phoneNumber = phoneNumber;
+        this.legalDocumentNumber = legalDocumentNumber;
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -36,6 +39,10 @@ public class PharmacyRegisterRequest {
 
     public String getPhoneNumber() {
         return phoneNumber;
+    }
+
+    public String getLegalDocumentNumber() {
+        return legalDocumentNumber;
     }
 
     public double getLatitude() {
@@ -56,6 +63,10 @@ public class PharmacyRegisterRequest {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public void setLegalDocumentNumber(String legalDocumentNumber) {
+        this.legalDocumentNumber = legalDocumentNumber;
     }
 
     public void setLatitude(double latitude) {

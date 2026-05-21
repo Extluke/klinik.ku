@@ -8,13 +8,12 @@ import com.telemedclinic.dto.CreatePharmacistAccountRequest;
 import com.telemedclinic.dto.CustomerRegisterRequest;
 import com.telemedclinic.dto.DoctorRegisterRequest;
 import com.telemedclinic.dto.LoginRequest;
-import com.telemedclinic.model.Admin;
 import com.telemedclinic.model.Customer;
 import com.telemedclinic.model.Doctor;
 import com.telemedclinic.model.Pharmacist;
 import com.telemedclinic.model.Pharmacy;
-import com.telemedclinic.model.Role;
 import com.telemedclinic.model.User;
+import com.telemedclinic.repository.DoctorRepository;
 import com.telemedclinic.repository.PharmacyRepository;
 import com.telemedclinic.repository.UserRepository;
 
@@ -22,16 +21,19 @@ import com.telemedclinic.repository.UserRepository;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final DoctorRepository doctorRepository;
     private final PharmacyRepository pharmacyRepository;
     private final PasswordEncoder passwordEncoder;
 
     public AuthService(
             UserRepository userRepository,
+            DoctorRepository doctorRepository,
             PharmacyRepository pharmacyRepository,
             PasswordEncoder passwordEncoder
     ) {
 
         this.userRepository = userRepository;
+        this.doctorRepository = doctorRepository;
         this.pharmacyRepository = pharmacyRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -44,13 +46,17 @@ public class AuthService {
                 request.getEmail(),
                 passwordEncoder.encode(request.getPassword()),
                 request.getPhoneNumber(),
-                request.getAddress()
+                request.getAddress(),
+                request.getGender(),
+                request.getBirthDate(),
+                request.getHeight(),
+                request.getWeight()
         );
 
         return toAuthResponse(userRepository.save(customer));
     }
 
-    public AuthResponse registerDoctor(DoctorRegisterRequest request) {
+    public Doctor registerDoctor(DoctorRegisterRequest request) {
         ensureEmailIsAvailable(request.getEmail());
 
         Doctor doctor = new Doctor(
@@ -62,7 +68,19 @@ public class AuthService {
                 request.getLicenseNumber()
         );
 
-        return toAuthResponse(userRepository.save(doctor));
+        return userRepository.save(doctor);
+    }
+
+    public Doctor approveDoctor(Long doctorId) {
+        Doctor doctor = findDoctorById(doctorId);
+        doctor.approveApplication();
+        return doctorRepository.save(doctor);
+    }
+
+    public Doctor declineDoctor(Long doctorId) {
+        Doctor doctor = findDoctorById(doctorId);
+        doctor.declineApplication();
+        return doctorRepository.save(doctor);
     }
 
     public AuthResponse createPharmacistAccount(CreatePharmacistAccountRequest request) {
@@ -71,8 +89,8 @@ public class AuthService {
         Pharmacy pharmacy = pharmacyRepository.findById(request.getPharmacyId())
                 .orElseThrow(() -> new IllegalArgumentException("Pharmacy not found."));
 
-        if (!pharmacy.isActive()) {
-            throw new IllegalStateException("Pharmacy is not active.");
+        if (!pharmacy.isApprovedPartner() || !pharmacy.isActive()) {
+            throw new IllegalStateException("Pharmacy is not approved and active.");
         }
 
         Pharmacist pharmacist = new Pharmacist(
@@ -95,7 +113,21 @@ public class AuthService {
             throw new IllegalArgumentException("Invalid email or password.");
         }
 
+        if (user instanceof Doctor doctor && !doctor.isApprovedPartner()) {
+            throw new IllegalStateException("Doctor account is not approved.");
+        }
+
+        if (user instanceof Pharmacist pharmacist
+                && (!pharmacist.getPharmacy().isApprovedPartner() || !pharmacist.getPharmacy().isActive())) {
+            throw new IllegalStateException("Pharmacy account is not approved and active.");
+        }
+
         return toAuthResponse(user);
+    }
+
+    private Doctor findDoctorById(Long doctorId) {
+        return doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new IllegalArgumentException("Doctor not found."));
     }
 
     private void ensureEmailIsAvailable(String email) {
@@ -109,27 +141,7 @@ public class AuthService {
                 user.getUserId(),
                 user.getName(),
                 user.getEmail(),
-                resolveRole(user)
+                user.getRole()
         );
-    }
-
-    private Role resolveRole(User user) {
-        if (user instanceof Customer) {
-            return Role.ROLE_CUSTOMER;
-        }
-
-        if (user instanceof Doctor) {
-            return Role.ROLE_DOCTOR;
-        }
-
-        if (user instanceof Pharmacist) {
-            return Role.ROLE_PHARMACIST;
-        }
-
-        if (user instanceof Admin) {
-            return Role.ROLE_ADMIN;
-        }
-
-        throw new IllegalArgumentException("Unknown user role.");
     }
 }

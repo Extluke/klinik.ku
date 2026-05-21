@@ -9,6 +9,9 @@ import jakarta.persistence.Column;
 public class Pharmacist extends User {
 
     // Attributes
+    @Column(nullable = false)
+    private String phoneNumber;
+
     @Column(nullable = false, unique = true)
     private String licenseNumber;
 
@@ -36,15 +39,20 @@ public class Pharmacist extends User {
                 name,
                 email,
                 password,
-                phoneNumber
+                Role.ROLE_PHARMACIST
         );
 
+        setPhoneNumber(phoneNumber);
         setLicenseNumber(licenseNumber);
         setPharmacy(pharmacy);
     }
 
 
     // Getter
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
     public String getLicenseNumber() {
         return licenseNumber;
     }
@@ -55,6 +63,17 @@ public class Pharmacist extends User {
 
 
     // Setter
+    public void setPhoneNumber(String phoneNumber) {
+
+        if (phoneNumber == null || phoneNumber.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Phone number cannot be empty."
+            );
+        }
+
+        this.phoneNumber = phoneNumber;
+    }
+
     public void setLicenseNumber(String licenseNumber) {
 
         if (licenseNumber == null || licenseNumber.isBlank()) {
@@ -79,6 +98,15 @@ public class Pharmacist extends User {
 
 
     // Behavior methods
+    public void updateProfile(
+            String name,
+            String phoneNumber
+    ) {
+
+        super.updateProfile(name);
+        setPhoneNumber(phoneNumber);
+    }
+
     public boolean isAssignedTo(Pharmacy pharmacy) {
 
         if (pharmacy == null) {

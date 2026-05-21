@@ -7,6 +7,9 @@ import jakarta.persistence.Entity;
 public class Admin extends User {
 
     // Attributes
+    @Column(nullable = false)
+    private String phoneNumber;
+
     @Column(nullable = false, unique = true)
     private String employeeNumber;
 
@@ -29,20 +32,36 @@ public class Admin extends User {
                 name,
                 email,
                 password,
-                phoneNumber
+                Role.ROLE_ADMIN
         );
 
+        setPhoneNumber(phoneNumber);
         setEmployeeNumber(employeeNumber);
     }
 
 
     // Getter
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
     public String getEmployeeNumber() {
         return employeeNumber;
     }
 
 
     // Setter
+    public void setPhoneNumber(String phoneNumber) {
+
+        if (phoneNumber == null || phoneNumber.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Phone number cannot be empty."
+            );
+        }
+
+        this.phoneNumber = phoneNumber;
+    }
+
     public void setEmployeeNumber(String employeeNumber) {
 
         if (employeeNumber == null || employeeNumber.isBlank()) {
@@ -56,6 +75,15 @@ public class Admin extends User {
 
 
     // Behavior methods
+    public void updateProfile(
+            String name,
+            String phoneNumber
+    ) {
+
+        super.updateProfile(name);
+        setPhoneNumber(phoneNumber);
+    }
+
     public boolean hasEmployeeNumber(String employeeNumber) {
 
         if (employeeNumber == null) {

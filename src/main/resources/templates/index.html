@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Beranda')}"></head>
+<body class="bg-white text-stone-900">
+
+  <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+  <!-- Section: Hero -->
+  <section id="beranda" class="bg-[#FDF3F0] py-20 px-6 md:px-12">
+    <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+      <!-- Kiri -->
+      <div>
+        <span class="bg-[#FAD5C8] text-[#D53E0F] text-xs font-semibold px-3 py-1 rounded-full inline-block">🏥 Platform Kesehatan Digital</span>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-stone-900 leading-tight mt-4">Konsultasi Dokter & Beli Obat dalam Satu Platform</h1>
+        <p class="text-stone-500 text-lg mt-4 leading-relaxed">Dapatkan layanan kesehatan terpercaya kapan saja dan di mana saja. Dokter berpengalaman siap membantu Anda.</p>
+        <div class="flex flex-wrap gap-3 mt-8">
+          <a th:href="@{/auth/register}" class="bg-[#D53E0F] hover:bg-[#5E0006] text-white font-semibold px-6 py-3 rounded-xl transition-colors">Mulai Konsultasi</a>
+          <a th:href="@{/customer/medicines}" class="border border-stone-300 text-stone-700 hover:border-[#D53E0F] hover:text-[#D53E0F] font-semibold px-6 py-3 rounded-xl transition-colors">Lihat Katalog Obat</a>
+        </div>
+      </div>
+      <!-- Kanan -->
+      <div>
+        <div class="bg-[#FAD5C8] rounded-2xl w-full aspect-square max-w-sm mx-auto flex flex-col items-center justify-center">
+          <svg class="w-24 h-24 text-[#D53E0F]" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+          </svg>
+          <span class="text-[#D53E0F] text-sm font-medium mt-4">Ilustrasi Dokter</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section: Stats -->
+  <section class="bg-white border-y border-stone-200 py-12 px-6 md:px-12">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+      <div>
+        <span class="text-4xl font-extrabold text-[#D53E0F]">500+</span>
+        <p class="text-stone-500 text-sm font-medium mt-1">Dokter Terdaftar</p>
+      </div>
+      <div>
+        <span class="text-4xl font-extrabold text-[#D53E0F]">10.000+</span>
+        <p class="text-stone-500 text-sm font-medium mt-1">Pasien Aktif</p>
+      </div>
+      <div>
+        <span class="text-4xl font-extrabold text-[#D53E0F]">50+</span>
+        <p class="text-stone-500 text-sm font-medium mt-1">Apotek Mitra</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section: Fitur Unggulan -->
+  <section id="layanan" class="bg-[#FDF3F0] py-20 px-6 md:px-12">
+    <div class="max-w-7xl mx-auto text-center">
+      <span class="bg-[#FAD5C8] text-[#D53E0F] text-xs font-semibold px-3 py-1 rounded-full inline-block">Layanan Kami</span>
+      <h2 class="text-3xl md:text-4xl font-extrabold text-stone-900 mt-4">Semua Kebutuhan Kesehatan dalam Satu Tempat</h2>
+      <p class="text-stone-500 text-lg mt-3 max-w-2xl mx-auto">Platform lengkap untuk konsultasi dokter, pembelian obat, hingga validasi resep secara digital.</p>
+    </div>
+    <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-6 mt-12">
+      <!-- Card 1 -->
+      <div class="bg-white rounded-2xl shadow-md p-6 border border-stone-200 hover:shadow-lg hover:border-[#D53E0F] transition-all duration-200">
+        <div class="bg-[#FAD5C8] w-12 h-12 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-[#D53E0F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-stone-900 mt-2">Konsultasi Online</h3>
+        <p class="text-stone-500 text-sm mt-2 leading-relaxed">Konsultasikan keluhan Anda dengan dokter berpengalaman melalui video call atau chat kapan saja.</p>
+      </div>
+      <!-- Card 2 -->
+      <div class="bg-white rounded-2xl shadow-md p-6 border border-stone-200 hover:shadow-lg hover:border-[#D53E0F] transition-all duration-200">
+        <div class="bg-[#FAD5C8] w-12 h-12 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-[#D53E0F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-stone-900 mt-2">Beli Obat Langsung</h3>
+        <p class="text-stone-500 text-sm mt-2 leading-relaxed">Pesan obat bebas dan suplemen langsung dari apotek mitra terpercaya dengan harga transparan.</p>
+      </div>
+      <!-- Card 3 -->
+      <div class="bg-white rounded-2xl shadow-md p-6 border border-stone-200 hover:shadow-lg hover:border-[#D53E0F] transition-all duration-200">
+        <div class="bg-[#FAD5C8] w-12 h-12 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-[#D53E0F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-stone-900 mt-2">Obat Resep Tervalidasi</h3>
+        <p class="text-stone-500 text-sm mt-2 leading-relaxed">Obat resep hanya bisa dibeli setelah resep diverifikasi oleh apoteker profesional.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section: Cara Kerja -->
+  <section class="bg-white py-20 px-6 md:px-12">
+    <div class="max-w-7xl mx-auto text-center">
+      <span class="bg-[#FAD5C8] text-[#D53E0F] text-xs font-semibold px-3 py-1 rounded-full inline-block">Cara Kerja</span>
+      <h2 class="text-3xl md:text-4xl font-extrabold text-stone-900 mt-4">Mulai dalam 3 Langkah Mudah</h2>
+    </div>
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-center gap-8 mt-12">
+      <!-- Step 1 -->
+      <div class="flex-1 text-center md:text-left">
+        <span class="text-6xl font-extrabold text-[#FAD5C8]">01</span>
+        <h3 class="font-bold text-stone-900 text-lg mt-2">Daftar Akun</h3>
+        <p class="text-stone-500 text-sm mt-1 leading-relaxed">Buat akun gratis sebagai pasien dalam hitungan menit.</p>
+      </div>
+      <!-- Connector -->
+      <div class="hidden md:block flex-shrink-0 w-16 border-t-2 border-dashed border-[#FAD5C8] mt-8"></div>
+      <!-- Step 2 -->
+      <div class="flex-1 text-center md:text-left">
+        <span class="text-6xl font-extrabold text-[#FAD5C8]">02</span>
+        <h3 class="font-bold text-stone-900 text-lg mt-2">Pilih Layanan</h3>
+        <p class="text-stone-500 text-sm mt-1 leading-relaxed">Konsultasi dokter atau cari obat yang Anda butuhkan.</p>
+      </div>
+      <!-- Connector -->
+      <div class="hidden md:block flex-shrink-0 w-16 border-t-2 border-dashed border-[#FAD5C8] mt-8"></div>
+      <!-- Step 3 -->
+      <div class="flex-1 text-center md:text-left">
+        <span class="text-6xl font-extrabold text-[#FAD5C8]">03</span>
+        <h3 class="font-bold text-stone-900 text-lg mt-2">Selesai & Sehat</h3>
+        <p class="text-stone-500 text-sm mt-1 leading-relaxed">Terima obat di rumah atau selesaikan konsultasi dari mana saja.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section: CTA Banner -->
+  <section class="py-12 px-6 md:px-12">
+    <div class="bg-[#D53E0F] rounded-2xl py-16 px-8 text-center max-w-7xl mx-auto">
+      <h2 class="text-3xl font-bold text-white">Siap Menjaga Kesehatan Anda?</h2>
+      <p class="text-white text-opacity-80 mt-2 text-lg">Daftar sekarang dan dapatkan konsultasi pertama Anda.</p>
+      <a th:href="@{/auth/register}" class="bg-white text-[#D53E0F] hover:bg-[#FDF3F0] font-bold px-8 py-3 rounded-xl transition-colors mt-6 inline-block">Daftar Gratis Sekarang</a>
+    </div>
+  </section>
+
+  <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+  <script>
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>

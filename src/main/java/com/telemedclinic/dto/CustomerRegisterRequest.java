@@ -1,5 +1,8 @@
 package com.telemedclinic.dto;
 
+import java.time.LocalDate;
+import com.telemedclinic.model.Gender;
+
 public class CustomerRegisterRequest {
 
     private String name;
@@ -7,6 +10,10 @@ public class CustomerRegisterRequest {
     private String password;
     private String phoneNumber;
     private String address;
+    private Gender gender;
+    private LocalDate birthDate;
+    private Double height;
+    private Double weight;
 
     public CustomerRegisterRequest() {
     }
@@ -16,7 +23,11 @@ public class CustomerRegisterRequest {
             String email,
             String password,
             String phoneNumber,
-            String address
+            String address,
+            Gender gender,
+            LocalDate birthDate,
+            Double height,
+            Double weight
     ) {
 
         this.name = name;
@@ -24,6 +35,10 @@ public class CustomerRegisterRequest {
         this.password = password;
         this.phoneNumber = phoneNumber;
         this.address = address;
+        this.gender = gender;
+        this.birthDate = birthDate;
+        this.height = height;
+        this.weight = weight;
     }
 
     public String getName() {
@@ -46,6 +61,22 @@ public class CustomerRegisterRequest {
         return address;
     }
 
+    public Gender getGender() {
+        return gender;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public Double getHeight() {
+        return height;
+    }
+
+    public Double getWeight() {
+        return weight;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -64,5 +95,21 @@ public class CustomerRegisterRequest {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public void setHeight(Double height) {
+        this.height = height;
+    }
+
+    public void setWeight(Double weight) {
+        this.weight = weight;
     }
 }

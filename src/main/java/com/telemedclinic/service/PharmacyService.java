@@ -20,6 +20,7 @@ public class PharmacyService {
                 request.getName(),
                 request.getAddress(),
                 request.getPhoneNumber(),
+                request.getLegalDocumentNumber(),
                 request.getLatitude(),
                 request.getLongitude()
         );
@@ -27,8 +28,24 @@ public class PharmacyService {
         return pharmacyRepository.save(pharmacy);
     }
 
+    public Pharmacy approvePharmacy(Long pharmacyId) {
+        Pharmacy pharmacy = findPharmacyById(pharmacyId);
+        pharmacy.approveApplication();
+        return pharmacyRepository.save(pharmacy);
+    }
+
+    public Pharmacy declinePharmacy(Long pharmacyId) {
+        Pharmacy pharmacy = findPharmacyById(pharmacyId);
+        pharmacy.declineApplication();
+        return pharmacyRepository.save(pharmacy);
+    }
+
     public void activatePharmacy(Long pharmacyId) {
         Pharmacy pharmacy = findPharmacyById(pharmacyId);
+        if (!pharmacy.isApprovedPartner()) {
+            throw new IllegalStateException("Pharmacy application is not approved.");
+        }
+
         pharmacy.activate();
         pharmacyRepository.save(pharmacy);
     }

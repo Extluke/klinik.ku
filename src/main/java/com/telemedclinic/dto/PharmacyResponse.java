@@ -1,6 +1,7 @@
 package com.telemedclinic.dto;
 
 import com.telemedclinic.model.Pharmacy;
+import com.telemedclinic.model.PartnerApplicationStatus;
 
 public class PharmacyResponse {
 
@@ -8,18 +9,22 @@ public class PharmacyResponse {
     private String name;
     private String address;
     private String phoneNumber;
+    private String legalDocumentNumber;
     private double latitude;
     private double longitude;
     private boolean active;
+    private PartnerApplicationStatus applicationStatus;
 
     public PharmacyResponse(Pharmacy pharmacy) {
         this.pharmacyId = pharmacy.getPharmacyId();
         this.name = pharmacy.getName();
         this.address = pharmacy.getAddress();
         this.phoneNumber = pharmacy.getPhoneNumber();
+        this.legalDocumentNumber = pharmacy.getLegalDocumentNumber();
         this.latitude = pharmacy.getLatitude();
         this.longitude = pharmacy.getLongitude();
         this.active = pharmacy.isActive();
+        this.applicationStatus = pharmacy.getApplicationStatus();
     }
 
     public Long getPharmacyId() {
@@ -38,6 +43,10 @@ public class PharmacyResponse {
         return phoneNumber;
     }
 
+    public String getLegalDocumentNumber() {
+        return legalDocumentNumber;
+    }
+
     public double getLatitude() {
         return latitude;
     }
@@ -48,5 +57,9 @@ public class PharmacyResponse {
 
     public boolean isActive() {
         return active;
+    }
+
+    public PartnerApplicationStatus getApplicationStatus() {
+        return applicationStatus;
     }
 }

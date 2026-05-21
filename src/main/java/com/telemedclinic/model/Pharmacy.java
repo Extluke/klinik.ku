@@ -10,6 +10,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 
 @Entity
@@ -30,10 +32,18 @@ public class Pharmacy {
     @Column(nullable = false)
     private String phoneNumber;
 
+    @Column(nullable = false)
+    private String legalDocumentNumber;
+
     private double latitude;
     private double longitude;
 
+    @Column(nullable = false)
     private boolean isActive;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PartnerApplicationStatus applicationStatus;
 
     @OneToMany(mappedBy = "pharmacy")
     private List<InventoryItem> inventoryItems = new ArrayList<>();
@@ -46,6 +56,7 @@ public class Pharmacy {
             String name,
             String address,
             String phoneNumber,
+            String legalDocumentNumber,
             double latitude,
             double longitude
     ) {
@@ -53,10 +64,12 @@ public class Pharmacy {
         setName(name);
         setAddress(address);
         setPhoneNumber(phoneNumber);
+        setLegalDocumentNumber(legalDocumentNumber);
         setLatitude(latitude);
         setLongitude(longitude);
 
-        this.isActive = true;
+        this.isActive = false;
+        this.applicationStatus = PartnerApplicationStatus.PENDING;
 
         this.inventoryItems = new ArrayList<>();
     }
@@ -79,6 +92,10 @@ public class Pharmacy {
         return phoneNumber;
     }
 
+    public String getLegalDocumentNumber() {
+        return legalDocumentNumber;
+    }
+
     public double getLatitude() {
         return latitude;
     }
@@ -89,6 +106,10 @@ public class Pharmacy {
 
     public boolean isActive() {
         return isActive;
+    }
+
+    public PartnerApplicationStatus getApplicationStatus() {
+        return applicationStatus;
     }
 
     public List<InventoryItem> getInventoryItems() {
@@ -130,6 +151,17 @@ public class Pharmacy {
         this.phoneNumber = phoneNumber;
     }
 
+    public void setLegalDocumentNumber(String legalDocumentNumber) {
+
+        if (legalDocumentNumber == null || legalDocumentNumber.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Legal document number cannot be empty."
+            );
+        }
+
+        this.legalDocumentNumber = legalDocumentNumber;
+    }
+
     public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
@@ -140,6 +172,17 @@ public class Pharmacy {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public void setApplicationStatus(PartnerApplicationStatus applicationStatus) {
+
+        if (applicationStatus == null) {
+            throw new IllegalArgumentException(
+                    "Application status cannot be null."
+            );
+        }
+
+        this.applicationStatus = applicationStatus;
     }
 
 
@@ -184,5 +227,19 @@ public class Pharmacy {
 
     public void deactivate() {
         this.isActive = false;
+    }
+
+    public void approveApplication() {
+        setApplicationStatus(PartnerApplicationStatus.APPROVED);
+        activate();
+    }
+
+    public void declineApplication() {
+        setApplicationStatus(PartnerApplicationStatus.DECLINED);
+        deactivate();
+    }
+
+    public boolean isApprovedPartner() {
+        return PartnerApplicationStatus.APPROVED.equals(applicationStatus);
     }
 }

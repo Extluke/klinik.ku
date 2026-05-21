@@ -117,7 +117,11 @@ public class AuthController {
                             customerRegisterForm.getEmail(),
                             customerRegisterForm.getPassword(),
                             customerRegisterForm.getPhoneNumber(),
-                            customerRegisterForm.getAddress()
+                            customerRegisterForm.getAddress(),
+                            customerRegisterForm.getGender(),
+                            customerRegisterForm.getBirthDate(),
+                            customerRegisterForm.getHeight(),
+                            customerRegisterForm.getWeight()
                     )
             );
 

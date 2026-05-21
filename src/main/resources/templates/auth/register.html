@@ -1,37 +1,6 @@
 <!DOCTYPE html>
 <html lang="id" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar sebagai Pasien - KlinikKu</title>
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts: Plus Jakarta Sans -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        /* Design System - CSS Custom Properties */
-        :root {
-            --color-primary    : #D53E0F;  /* Primary Orange — elemen utama, tombol, aksen */
-            --color-dark       : #5E0006;  /* Dark Red-Orange — hover state, emphasis */
-            --color-light      : #FAD5C8;  /* Light tint dari primary — background aksen */
-            --color-very-light : #FDF3F0;  /* Very light — background halaman */
-            --color-white      : #FFFFFF;
-            --color-text-dark  : #1C1917;  /* stone-900 */
-            --color-text-muted : #78716C;  /* stone-500 */
-            --color-border     : #E7E5E4;  /* stone-200 */
-            --color-danger     : #EF4444;
-        }
-        
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-    </style>
-</head>
+<head th:replace="~{fragments/head :: head('Daftar')}"></head>
 
 <body class="bg-[#FDF3F0] min-h-screen flex items-center justify-center px-4 py-8">
     
@@ -165,6 +134,57 @@
                           class="border border-stone-200 rounded-xl px-4 py-2.5 w-full text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent transition resize-none"></textarea>
                 <!-- th:errors untuk menampilkan pesan error validasi alamat -->
                 <p th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="text-red-500 text-xs mt-1"></p>
+            </div>
+
+            <div>
+                <label for="gender" class="font-medium text-sm text-stone-700 mb-1 block">Jenis Kelamin</label>
+                <select id="gender"
+                        th:field="*{gender}"
+                        th:classappend="${#fields.hasErrors('gender')} ? 'border-red-400' : ''"
+                        class="border border-stone-200 rounded-xl px-4 py-2.5 w-full text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent transition bg-white">
+                    <option value="">Pilih jenis kelamin</option>
+                    <option value="MALE">Laki-laki</option>
+                    <option value="FEMALE">Perempuan</option>
+                </select>
+                <p th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}" class="text-red-500 text-xs mt-1"></p>
+            </div>
+
+            <div>
+                <label for="birthDate" class="font-medium text-sm text-stone-700 mb-1 block">Tanggal Lahir</label>
+                <input type="date"
+                       id="birthDate"
+                       th:field="*{birthDate}"
+                       th:classappend="${#fields.hasErrors('birthDate')} ? 'border-red-400' : ''"
+                       class="border border-stone-200 rounded-xl px-4 py-2.5 w-full text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent transition"/>
+                <p th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}" class="text-red-500 text-xs mt-1"></p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="height" class="font-medium text-sm text-stone-700 mb-1 block">Tinggi Badan (cm)</label>
+                    <input type="number"
+                           id="height"
+                           th:field="*{height}"
+                           min="1"
+                           step="0.1"
+                           placeholder="Contoh: 170"
+                           th:classappend="${#fields.hasErrors('height')} ? 'border-red-400' : ''"
+                           class="border border-stone-200 rounded-xl px-4 py-2.5 w-full text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent transition"/>
+                    <p th:if="${#fields.hasErrors('height')}" th:errors="*{height}" class="text-red-500 text-xs mt-1"></p>
+                </div>
+
+                <div>
+                    <label for="weight" class="font-medium text-sm text-stone-700 mb-1 block">Berat Badan (kg)</label>
+                    <input type="number"
+                           id="weight"
+                           th:field="*{weight}"
+                           min="1"
+                           step="0.1"
+                           placeholder="Contoh: 65"
+                           th:classappend="${#fields.hasErrors('weight')} ? 'border-red-400' : ''"
+                           class="border border-stone-200 rounded-xl px-4 py-2.5 w-full text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent transition"/>
+                    <p th:if="${#fields.hasErrors('weight')}" th:errors="*{weight}" class="text-red-500 text-xs mt-1"></p>
+                </div>
             </div>
             
             <!-- Tombol Submit -->

@@ -5,9 +5,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
@@ -30,7 +34,11 @@ public abstract class User {
     private String password;
 
     @Column(nullable = false)
-    private String phoneNumber;
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
 
     // No-args constructor for JPA
@@ -43,13 +51,13 @@ public abstract class User {
             String name,
             String email,
             String password,
-            String phoneNumber
+            Role role
     ) {
 
         setName(name);
         setEmail(email);
         setPassword(password);
-        setPhoneNumber(phoneNumber);
+        setRole(role);
     }
 
 
@@ -70,8 +78,12 @@ public abstract class User {
         return password;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public Role getRole() {
+        return role;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
 
@@ -115,26 +127,28 @@ public abstract class User {
         this.password = password;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
+    public void setRole(Role role) {
 
-        if (phoneNumber == null || phoneNumber.isBlank()) {
+        if (role == null) {
             throw new IllegalArgumentException(
-                    "Phone number cannot be empty."
+                    "Role cannot be null."
             );
         }
 
-        this.phoneNumber = phoneNumber;
+        this.role = role;
+    }
+
+    @PrePersist
+    protected void setCreatedAtBeforePersist() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
     }
 
 
     // Behavior methods
-    public void updateProfile(
-            String name,
-            String phoneNumber
-    ) {
-
+    public void updateProfile(String name) {
         setName(name);
-        setPhoneNumber(phoneNumber);
     }
 
     public void changePassword(String newPassword) {
