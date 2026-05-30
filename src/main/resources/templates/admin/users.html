@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola User - KlinikKu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <aside th:replace="~{fragments/admin-sidebar :: sidebar('users')}"></aside>
+
+        <!-- MAIN CONTENT -->
+        <div class="flex-1 flex flex-col">
+            <!-- STICKY HEADER -->
+            <header class="sticky top-0 z-10 bg-white border-b border-stone-200 px-8 py-6">
+                <h1 class="text-2xl font-bold text-stone-900">Kelola User</h1>
+                <p class="text-sm text-stone-500 mt-1">Kelola semua pengguna terdaftar di platform</p>
+            </header>
+
+            <!-- PAGE CONTENT -->
+            <main class="flex-1 overflow-y-auto px-8 py-6">
+                <!-- ALERT MESSAGES -->
+                <div th:if="${successMessage}" class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm flex items-center gap-2 mb-4">
+                    <i class="ti ti-circle-check text-base"></i>
+                    <span th:text="${successMessage}">Berhasil.</span>
+                </div>
+
+                <div th:if="${warningMessage}" class="bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-xl px-4 py-3 text-sm flex items-center gap-2 mb-4">
+                    <i class="ti ti-alert-triangle text-base"></i>
+                    <span th:text="${warningMessage}">Peringatan.</span>
+                </div>
+
+                <div th:if="${error}" class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm flex items-center gap-2 mb-4">
+                    <i class="ti ti-alert-circle text-base"></i>
+                    <span th:text="${error}">Error.</span>
+                </div>
+
+                <!-- SECTION 1: FILTER & SEARCH BAR -->
+                <div class="bg-white rounded-2xl shadow-md p-6 mb-6">
+                    <form method="get" th:action="@{/admin/users}" class="flex items-center justify-between gap-4">
+                        <!-- Search Input -->
+                        <div class="relative flex-1">
+                            <i class="ti ti-search absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 text-lg"></i>
+                            <input 
+                                type="text" 
+                                name="search" 
+                                placeholder="Cari nama atau email..." 
+                                th:value="${param.search}"
+                                class="w-full pl-10 pr-4 py-2 text-sm border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D53E0F]"
+                            >
+                        </div>
+
+                        <!-- Role Filter Pills -->
+                        <div class="flex items-center gap-2">
+                            <!-- Semua -->
+                            <button 
+                                type="submit" 
+                                name="role" 
+                                value=""
+                                th:classappend="${param.role == null or param.role == ''} ? 'bg-[#D53E0F] text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'"
+                                class="rounded-full text-xs font-semibold px-3 py-1.5 flex items-center gap-1.5 transition-colors"
+                            >
+                                <i class="ti ti-layout-list text-base"></i>
+                                <span>Semua</span>
+                            </button>
+
+                            <!-- Dokter -->
+                            <button 
+                                type="submit" 
+                                name="role" 
+                                value="DOCTOR"
+                                th:classappend="${param.role == 'DOCTOR'} ? 'bg-[#D53E0F] text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'"
+                                class="rounded-full text-xs font-semibold px-3 py-1.5 flex items-center gap-1.5 transition-colors"
+                            >
+                                <i class="ti ti-stethoscope text-base"></i>
+                                <span>Dokter</span>
+                            </button>
+
+                            <!-- Apoteker -->
+                            <button 
+                                type="submit" 
+                                name="role" 
+                                value="PHARMACIST"
+                                th:classappend="${param.role == 'PHARMACIST'} ? 'bg-[#D53E0F] text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'"
+                                class="rounded-full text-xs font-semibold px-3 py-1.5 flex items-center gap-1.5 transition-colors"
+                            >
+                                <i class="ti ti-building-hospital text-base"></i>
+                                <span>Apoteker</span>
+                            </button>
+
+                            <!-- Pengguna -->
+                            <button 
+                                type="submit" 
+                                name="role" 
+                                value="CUSTOMER"
+                                th:classappend="${param.role == 'CUSTOMER'} ? 'bg-[#D53E0F] text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'"
+                                class="rounded-full text-xs font-semibold px-3 py-1.5 flex items-center gap-1.5 transition-colors"
+                            >
+                                <i class="ti ti-user text-base"></i>
+                                <span>Pengguna</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- SECTION 2: USER TABLE -->
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+                    <table class="w-full">
+                        <!-- Table Header -->
+                        <thead>
+                            <tr class="bg-stone-50 border-b border-stone-200">
+                                <th class="px-6 py-3 text-left text-xs text-stone-500 uppercase tracking-wide font-semibold">No.</th>
+                                <th class="px-6 py-3 text-left text-xs text-stone-500 uppercase tracking-wide font-semibold">Nama & Email</th>
+                                <th class="px-6 py-3 text-left text-xs text-stone-500 uppercase tracking-wide font-semibold">Role</th>
+                                <th class="px-6 py-3 text-left text-xs text-stone-500 uppercase tracking-wide font-semibold">Status</th>
+                                <th class="px-6 py-3 text-left text-xs text-stone-500 uppercase tracking-wide font-semibold">Aksi</th>
+                            </tr>
+                        </thead>
+
+                        <!-- Table Body -->
+                        <tbody>
+                            <!-- Users Loop -->
+                            <tr th:each="user, iterStat : ${users}" class="border-b border-stone-200 hover:bg-stone-50 transition-colors">
+                                <!-- No. -->
+                                <td class="px-6 py-4 text-sm text-stone-400" th:text="${iterStat.count}">1</td>
+
+                                <!-- Nama & Email -->
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-[#FAD5C8] flex items-center justify-center flex-shrink-0">
+                                            <span class="text-xs font-bold text-[#D53E0F]" th:text="${#strings.substring(user.name, 0, 1)}">A</span>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="font-semibold text-stone-900 text-sm truncate" th:text="${user.name}">User Name</p>
+                                            <p class="text-xs text-stone-500 truncate" th:text="${user.email}">user@example.com</p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Role -->
+                                <td class="px-6 py-4">
+                                    <span 
+                                        th:classappend="${user.role.name() == 'ROLE_DOCTOR' ? 'bg-blue-100 text-blue-700' : (user.role.name() == 'ROLE_PHARMACIST' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700')}"
+                                        class="inline-flex items-center rounded-full text-xs font-semibold px-2.5 py-1"
+                                    >
+                                        <span th:text="${user.role.name() == 'ROLE_DOCTOR' ? 'Dokter' : (user.role.name() == 'ROLE_PHARMACIST' ? 'Apoteker' : 'Pengguna')}">Role</span>
+                                    </span>
+                                </td>
+
+                                <!-- Status -->
+                                <td class="px-6 py-4">
+                                    <span 
+                                        th:classappend="${user.active} ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                                        class="inline-flex items-center gap-1.5 rounded-full text-xs font-semibold px-2.5 py-1"
+                                    >
+                                        <i th:classappend="${user.active} ? 'ti-circle-check' : 'ti-circle-x'" class="ti text-base"></i>
+                                        <span th:text="${user.active} ? 'Aktif' : 'Nonaktif'">Status</span>
+                                    </span>
+                                </td>
+
+                                <!-- Aksi -->
+                                <td class="px-6 py-4">
+                                    <form 
+                                        th:if="${!user.active}" 
+                                        th:action="@{/admin/users/{id}/toggle-status(id=${user.userId})}"
+                                        method="post" 
+                                        class="inline"
+                                    >
+                                        <button 
+                                            type="submit"
+                                            class="inline-flex items-center gap-1 bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors"
+                                        >
+                                            <i class="ti ti-circle-check text-base"></i>
+                                            <span>Aktifkan</span>
+                                        </button>
+                                    </form>
+
+                                    <form 
+                                        th:if="${user.active}" 
+                                        th:action="@{/admin/users/{id}/toggle-status(id=${user.userId})}"
+                                        method="post" 
+                                        class="inline"
+                                    >
+                                        <button 
+                                            type="submit"
+                                            class="inline-flex items-center gap-1 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors"
+                                        >
+                                            <i class="ti ti-circle-x text-base"></i>
+                                            <span>Nonaktifkan</span>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+
+                            <!-- Empty State -->
+                            <tr th:if="${#lists.isEmpty(users)}">
+                                <td colspan="5" class="px-6 py-12 text-center">
+                                    <i class="ti ti-users-off text-4xl text-stone-300 block mb-2"></i>
+                                    <p class="text-sm text-stone-400">Tidak ada user ditemukan</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- SECTION 3: PAGINATION -->
+                <div th:if="${!#lists.isEmpty(users)}" class="flex items-center justify-center gap-2 mt-8">
+                    <!-- Previous Button -->
+                    <a 
+                        th:href="@{/admin/users(page=${currentPage - 1}, role=${param.role}, search=${param.search})}"
+                        th:classappend="${currentPage == 0} ? 'opacity-50 pointer-events-none cursor-not-allowed' : 'hover:bg-stone-100'"
+                        class="rounded-xl w-9 h-9 flex items-center justify-center text-sm font-medium border border-stone-200 bg-white transition-colors"
+                    >
+                        <i class="ti ti-chevron-left text-base"></i>
+                    </a>
+
+                    <!-- Page Number Buttons -->
+                    <th:block th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}">
+                        <a 
+                            th:href="@{/admin/users(page=${pageNum}, role=${param.role}, search=${param.search})}"
+                            th:classappend="${currentPage == pageNum} ? 'bg-[#D53E0F] text-white' : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'"
+                            class="rounded-xl w-9 h-9 flex items-center justify-center text-sm font-medium transition-colors"
+                            th:text="${pageNum + 1}"
+                        >1</a>
+                    </th:block>
+
+                    <!-- Next Button -->
+                    <a 
+                        th:href="@{/admin/users(page=${currentPage + 1}, role=${param.role}, search=${param.search})}"
+                        th:classappend="${currentPage == totalPages - 1} ? 'opacity-50 pointer-events-none cursor-not-allowed' : 'hover:bg-stone-100'"
+                        class="rounded-xl w-9 h-9 flex items-center justify-center text-sm font-medium border border-stone-200 bg-white transition-colors"
+                    >
+                        <i class="ti ti-chevron-right text-base"></i>
+                    </a>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

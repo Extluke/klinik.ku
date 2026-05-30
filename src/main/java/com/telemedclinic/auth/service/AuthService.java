@@ -146,7 +146,33 @@ public class AuthService {
             throw new IllegalStateException("Pharmacy account is not approved and active.");
         }
 
+        if (user instanceof Doctor doctor && doctor.isMustChangePassword()) {
+            return toAuthResponse(user, true);
+        }
+
+        if (user instanceof Pharmacist pharmacist && pharmacist.isMustChangePassword()) {
+            return toAuthResponse(user, true);
+        }
+
         return toAuthResponse(user);
+    }
+
+    @Transactional
+    public void changePassword(Long userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+
+        user.changePassword(passwordEncoder.encode(newPassword));
+
+        if (user instanceof Doctor doctor) {
+            doctor.clearMustChangePassword();
+        }
+
+        if (user instanceof Pharmacist pharmacist) {
+            pharmacist.clearMustChangePassword();
+        }
+
+        userRepository.save(user);
     }
 
     private Doctor findDoctorById(Long doctorId) {
@@ -161,11 +187,16 @@ public class AuthService {
     }
 
     private AuthResponse toAuthResponse(User user) {
+        return toAuthResponse(user, false);
+    }
+
+    private AuthResponse toAuthResponse(User user, boolean mustChangePassword) {
         return new AuthResponse(
                 user.getUserId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRole()
+                user.getRole(),
+                mustChangePassword
         );
     }
 }

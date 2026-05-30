@@ -71,16 +71,25 @@ public class AuthController {
             session.setAttribute("currentUserName", authResponse.getName());
             session.setAttribute("currentUserEmail", authResponse.getEmail());
             session.setAttribute("currentUserRole", authResponse.getRole());
+            session.setAttribute("mustChangePassword", authResponse.isMustChangePassword());
 
             if (authResponse.getRole() == Role.ROLE_ADMIN) {
                 return "redirect:/admin/dashboard";
             }
 
             if (authResponse.getRole() == Role.ROLE_PHARMACIST) {
+                if (authResponse.isMustChangePassword()) {
+                    return "redirect:/auth/change-password";
+                }
+
                 return "redirect:/pharmacist/dashboard";
             }
 
             if (authResponse.getRole() == Role.ROLE_DOCTOR) {
+                if (authResponse.isMustChangePassword()) {
+                    return "redirect:/auth/change-password";
+                }
+
                 return "redirect:/doctor/dashboard";
             }
 

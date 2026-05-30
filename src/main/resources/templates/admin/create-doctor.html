@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Dokter - KlinikKu Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#FDF3F0]">
+    <div class="flex h-screen bg-[#FDF3F0]">
+        <aside th:replace="~{fragments/admin-sidebar :: sidebar('add-doctor')}"></aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 overflow-auto">
+            <!-- Header -->
+            <header class="sticky top-0 bg-white border-b border-stone-200 shadow-sm px-8 py-6 z-10">
+                <h1 class="text-2xl font-bold text-stone-900">Tambah Dokter</h1>
+                <p class="text-sm text-stone-500 mt-1">Buat akun dokter baru yang telah diverifikasi</p>
+            </header>
+
+            <!-- Content -->
+            <div class="p-8">
+                <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-md border border-stone-200 p-8">
+                    <!-- Info Box -->
+                    <div class="flex items-start gap-3 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl px-4 py-3 mb-8">
+                        <i class="ti ti-info-circle text-base mt-0.5 flex-shrink-0"></i>
+                        <p class="text-sm">Pastikan dokumen STR dokter sudah diverifikasi secara offline sebelum membuat akun. Password sementara akan dibuat otomatis dan dikirim ke email dokter.</p>
+                    </div>
+
+                    <!-- Success State -->
+                    <div th:if="${successMessage}" class="text-center py-8">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="ti ti-circle-check text-3xl text-green-600"></i>
+                        </div>
+                        <h2 class="text-lg font-bold text-stone-900 mb-1">Akun Dokter Berhasil Dibuat</h2>
+                        <p class="text-sm text-stone-500 mb-2" th:text="${successMessage}">Pesan sukses.</p>
+                        <p class="text-xs text-stone-400 mb-8">Dokter dapat login menggunakan email dan password sementara yang dikirimkan.</p>
+                        <div class="flex items-center justify-center gap-3">
+                            <a th:href="@{/admin/doctors/create}"
+                               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-sm font-semibold hover:bg-stone-50 transition-colors">
+                                <i class="ti ti-plus text-base"></i>
+                                Tambah Dokter Lain
+                            </a>
+                            <a th:href="@{/admin/users}"
+                               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#D53E0F] text-white text-sm font-semibold hover:bg-[#5E0006] transition-colors">
+                                <i class="ti ti-users text-base"></i>
+                                Lihat Daftar User
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Form -->
+                    <form th:unless="${successMessage}" th:action="@{/admin/doctors/create}" th:object="${createDoctorForm}" method="post" class="space-y-6">
+                        <!-- Error Alert -->
+                        <div th:if="${errorMessage}" class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm flex items-center gap-2 mb-6">
+                            <i class="ti ti-alert-circle text-base"></i>
+                            <span th:text="${errorMessage}">Error.</span>
+                        </div>
+
+                        <!-- Field 1: Nama Lengkap -->
+                        <div>
+                            <label for="name" class="block text-sm font-semibold text-stone-700 mb-1.5">Nama Lengkap</label>
+                            <div class="relative">
+                                <i class="ti ti-user absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400"></i>
+                                <input type="text"
+                                       id="name"
+                                       th:field="*{name}"
+                                       placeholder="Contoh: dr. Ahmad Fauzi, Sp.PD"
+                                       class="w-full pl-10 pr-4 py-2.5 text-sm border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D53E0F]"
+                                       required>
+                            </div>
+                            <p class="text-xs text-stone-400 mt-1">Tulis nama lengkap beserta gelar sesuai dokumen resmi.</p>
+                            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-red-500 text-xs mt-1"></p>
+                        </div>
+
+                        <!-- Field 2: Email -->
+                        <div>
+                            <label for="email" class="block text-sm font-semibold text-stone-700 mb-1.5">Email</label>
+                            <div class="relative">
+                                <i class="ti ti-mail absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400"></i>
+                                <input type="email"
+                                       id="email"
+                                       th:field="*{email}"
+                                       placeholder="contoh@email.com"
+                                       class="w-full pl-10 pr-4 py-2.5 text-sm border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D53E0F]"
+                                       required>
+                            </div>
+                            <p class="text-xs text-stone-400 mt-1">Email ini akan digunakan sebagai username login dokter.</p>
+                            <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-red-500 text-xs mt-1"></p>
+                        </div>
+
+                        <!-- Field 3: Nomor Telepon -->
+                        <div>
+                            <label for="phoneNumber" class="block text-sm font-semibold text-stone-700 mb-1.5">Nomor Telepon</label>
+                            <div class="relative">
+                                <i class="ti ti-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400"></i>
+                                <input type="tel"
+                                       id="phoneNumber"
+                                       th:field="*{phoneNumber}"
+                                       placeholder="08xxxxxxxxxx"
+                                       class="w-full pl-10 pr-4 py-2.5 text-sm border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D53E0F]"
+                                       required>
+                            </div>
+                            <p class="text-xs text-stone-400 mt-1">Nomor yang dapat dihubungi untuk keperluan operasional.</p>
+                            <p th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="text-red-500 text-xs mt-1"></p>
+                        </div>
+
+                        <!-- Field 4: Spesialisasi -->
+                        <div>
+                            <label for="specialization" class="block text-sm font-semibold text-stone-700 mb-1.5">Spesialisasi</label>
+                            <div class="relative">
+                                <select id="specialization"
+                                        th:field="*{specialization}"
+                                        class="w-full px-4 py-2.5 text-sm border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D53E0F] appearance-none bg-white pr-10"
+                                        required>
+                                    <option value="">-- Pilih Spesialisasi --</option>
+                                    <option value="Dokter Umum">Dokter Umum</option>
+                                    <option value="Spesialis Penyakit Dalam">Spesialis Penyakit Dalam</option>
+                                    <option value="Spesialis Anak">Spesialis Anak</option>
+                                    <option value="Spesialis Kandungan & Kebidanan">Spesialis Kandungan & Kebidanan</option>
+                                    <option value="Spesialis Kulit & Kelamin">Spesialis Kulit & Kelamin</option>
+                                    <option value="Spesialis Jiwa / Psikiatri">Spesialis Jiwa / Psikiatri</option>
+                                    <option value="Spesialis Gigi & Mulut">Spesialis Gigi & Mulut</option>
+                                    <option value="Spesialis Mata">Spesialis Mata</option>
+                                    <option value="Spesialis THT">Spesialis THT</option>
+                                    <option value="Spesialis Bedah">Spesialis Bedah</option>
+                                    <option value="Spesialis Jantung & Pembuluh Darah">Spesialis Jantung & Pembuluh Darah</option>
+                                    <option value="Spesialis Saraf">Spesialis Saraf</option>
+                                    <option value="Spesialis Urologi">Spesialis Urologi</option>
+                                    <option value="Spesialis Ortopedi">Spesialis Ortopedi</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                                <i class="ti ti-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-stone-400 pointer-events-none"></i>
+                            </div>
+                            <p th:if="${#fields.hasErrors('specialization')}" th:errors="*{specialization}" class="text-red-500 text-xs mt-1"></p>
+                        </div>
+
+                        <!-- Field 5: Nomor STR -->
+                        <div>
+                            <label for="licenseNumber" class="block text-sm font-semibold text-stone-700 mb-1.5">Nomor STR</label>
+                            <div class="relative">
+                                <i class="ti ti-id-badge absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400"></i>
+                                <input type="text"
+                                       id="licenseNumber"
+                                       th:field="*{licenseNumber}"
+                                       placeholder="Nomor STR sesuai dokumen"
+                                       class="w-full pl-10 pr-4 py-2.5 text-sm border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D53E0F]"
+                                       required>
+                            </div>
+                            <p class="text-xs text-stone-400 mt-1">Surat Tanda Registrasi dokter. Pastikan sesuai dokumen yang telah diverifikasi.</p>
+                            <p th:if="${#fields.hasErrors('licenseNumber')}" th:errors="*{licenseNumber}" class="text-red-500 text-xs mt-1"></p>
+
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="mt-8 pt-6 border-t border-stone-100 flex justify-between items-center">
+                            <a th:href="@{/admin/users}"
+                               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-sm font-semibold hover:bg-stone-50 transition-colors">
+                                <i class="ti ti-arrow-left text-base"></i>
+                                Batal
+                            </a>
+                            <button type="submit"
+                                    class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#D53E0F] text-white text-sm font-semibold hover:bg-[#5E0006] transition-colors">
+                                <i class="ti ti-plus text-base"></i>
+                                Buat Akun Dokter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
