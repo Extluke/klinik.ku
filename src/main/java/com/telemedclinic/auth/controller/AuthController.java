@@ -70,7 +70,7 @@ public class AuthController {
             session.setAttribute("currentUserId", authResponse.getUserId());
             session.setAttribute("currentUserName", authResponse.getName());
             session.setAttribute("currentUserEmail", authResponse.getEmail());
-            session.setAttribute("currentUserRole", authResponse.getRole());
+            session.setAttribute("currentUserRole", authResponse.getRole().name());
 
             if (authResponse.getRole() == Role.ROLE_ADMIN) {
                 return "redirect:/admin/dashboard";
@@ -85,8 +85,11 @@ public class AuthController {
             }
 
             return "redirect:/customer/dashboard";
-        } catch (RuntimeException exception) {
-            model.addAttribute("error", "Email atau password salah.");
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            model.addAttribute("error", exception.getMessage());
+            return "auth/login";
+        } catch (Exception exception) {
+            model.addAttribute("error", "Terjadi kesalahan saat login. Silakan coba lagi.");
             return "auth/login";
         }
     }

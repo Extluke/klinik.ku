@@ -2,75 +2,566 @@ package com.telemedclinic.customer.controller;
 
 import jakarta.servlet.http.HttpSession;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import com.telemedclinic.cart.entity.CartItem;
+import com.telemedclinic.cart.repository.CartItemRepository;
+import com.telemedclinic.consultation.model.Consultation;
+import com.telemedclinic.consultation.model.ConsultationStatus;
+import com.telemedclinic.consultation.repository.ConsultationRepository;
+import com.telemedclinic.customer.dto.CheckoutForm;
+import com.telemedclinic.customer.dto.ConsultationForm;
+import com.telemedclinic.inventory.entity.InventoryItem;
+import com.telemedclinic.inventory.repository.InventoryItemRepository;
+import com.telemedclinic.order.entity.DeliveryMethod;
+import com.telemedclinic.order.entity.Order;
+import com.telemedclinic.order.entity.OrderItem;
+import com.telemedclinic.order.entity.OrderStatus;
+import com.telemedclinic.order.entity.PaymentMethod;
+import com.telemedclinic.order.entity.PaymentStatus;
+import com.telemedclinic.order.repository.OrderRepository;
+import com.telemedclinic.prescription.model.Prescription;
+import com.telemedclinic.prescription.repository.PrescriptionRepository;
+import com.telemedclinic.user.entity.Customer;
+import com.telemedclinic.user.entity.Doctor;
 import com.telemedclinic.user.entity.Role;
+import com.telemedclinic.user.entity.User;
+import com.telemedclinic.user.repository.DoctorRepository;
+import com.telemedclinic.user.repository.UserRepository;
 
 @Controller
 @RequestMapping("/customer")
 public class CustomerController {
 
-    // Menampilkan dashboard sederhana untuk customer yang sudah login.
-    @GetMapping("/dashboard")
-    public String showDashboard(
-            HttpSession session,
-            Model model
+    private final UserRepository userRepository;
+    private final DoctorRepository doctorRepository;
+    private final PrescriptionRepository prescriptionRepository;
+    private final InventoryItemRepository inventoryItemRepository;
+    private final CartItemRepository cartItemRepository;
+    private final OrderRepository orderRepository;
+    private final ConsultationRepository consultationRepository;
+
+    public CustomerController(
+            UserRepository userRepository,
+            DoctorRepository doctorRepository,
+            PrescriptionRepository prescriptionRepository,
+            InventoryItemRepository inventoryItemRepository,
+            CartItemRepository cartItemRepository,
+            OrderRepository orderRepository,
+            ConsultationRepository consultationRepository
     ) {
+        this.userRepository = userRepository;
+        this.doctorRepository = doctorRepository;
+        this.prescriptionRepository = prescriptionRepository;
+        this.inventoryItemRepository = inventoryItemRepository;
+        this.cartItemRepository = cartItemRepository;
+        this.orderRepository = orderRepository;
+        this.consultationRepository = consultationRepository;
+    }
 
-        Object role = session.getAttribute("currentUserRole");
+    @ModelAttribute
+    public void addCommonAttributes(HttpSession session, Model model) {
+        findAuthenticatedCustomer(session).ifPresent(customer -> {
+            model.addAttribute("customer", Map.of(
+                    "name", customer.getName(),
+                    "email", customer.getEmail()
+            ));
+            model.addAttribute("cartCount", cartItemRepository.countByCustomerUserId(customer.getUserId()));
+        });
+    }
 
-        if (role != Role.ROLE_CUSTOMER) {
+    private void setActiveSection(Model model, String activeSection) {
+        model.addAttribute("activeSection", activeSection);
+    }
+
+    @GetMapping("/dashboard")
+    public String showDashboard(HttpSession session, Model model) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
             return "redirect:/auth/login";
         }
 
-        String customerName = (String) session.getAttribute("currentUserName");
-        String customerEmail = (String) session.getAttribute("currentUserEmail");
+        Customer customer = optionalCustomer.get();
+        long customerId = customer.getUserId();
 
-        model.addAttribute("customer", Map.of(
-                "name", customerName != null ? customerName : "Budi Santoso",
-                "email", customerEmail != null ? customerEmail : "budi@gmail.com"
-        ));
+        List<Consultation> consultations = consultationRepository.findByCustomerUserIdOrderByCreatedAtDesc(customerId);
+        List<Order> orders = orderRepository.findByCustomerUserIdOrderByCreatedAtDesc(customerId);
+        long totalPrescriptions = prescriptionRepository.countByCustomerUserId(customerId);
+        long unusedPrescriptions = prescriptionRepository.countByCustomerUserIdAndIsUsedFalse(customerId);
+        List<Prescription> recentPrescriptions = prescriptionRepository.findTop3ByCustomerUserIdOrderByIssuedDateDesc(customerId);
+
+        long activeConsultations = consultations.stream()
+                .filter(c -> c.getStatus() == ConsultationStatus.PENDING || c.getStatus() == ConsultationStatus.IN_PROGRESS)
+                .count();
+        long activeOrders = orders.stream()
+                .filter(o -> o.getStatus() == OrderStatus.PENDING || o.getStatus() == OrderStatus.PROCESSING || o.getStatus() == OrderStatus.SHIPPED)
+                .count();
 
         model.addAttribute("stats", Map.of(
-                "activeConsultations", 2,
-                "activeOrders", 1,
-                "totalOrders", 8
+                "activeConsultations", activeConsultations,
+                "activeOrders", activeOrders,
+                "totalOrders", orders.size(),
+                "unusedPrescriptions", unusedPrescriptions,
+                "totalPrescriptions", totalPrescriptions
         ));
 
-        model.addAttribute("recentConsultations", List.of(
-                Map.of(
-                        "doctorName", "Dr. Ahmad Fauzi",
-                        "specialization", "Dokter Umum",
-                        "status", "Berlangsung"
-                ),
-                Map.of(
-                        "doctorName", "Dr. Rina Marlina",
-                        "specialization", "Penyakit Dalam",
-                        "status", "Menunggu"
-                )
-        ));
-
-        model.addAttribute("recentOrders", List.of(
-                Map.of(
-                        "id", "ORD-0021",
-                        "itemSummary", "Paracetamol 500mg + 2 lainnya",
-                        "totalPrice", "Rp 85.000",
-                        "status", "Diproses"
-                ),
-                Map.of(
-                        "id", "ORD-0020",
-                        "itemSummary", "Vitamin C 500mg",
-                        "totalPrice", "Rp 35.000",
-                        "status", "Selesai"
-                )
-        ));
+        model.addAttribute("recentConsultations", consultations.stream().limit(3).toList());
+        model.addAttribute("recentOrders", orders.stream().limit(3).toList());
+        model.addAttribute("recentPrescriptions", recentPrescriptions);
+        setActiveSection(model, "dashboard");
 
         return "customer/dashboard";
+    }
+
+    @GetMapping("/medicines")
+    public String showMedicines(
+            HttpSession session,
+            Model model,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String sort
+    ) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        List<InventoryItem> medicines;
+        if (search != null && !search.isBlank()) {
+            medicines = inventoryItemRepository.findByMedicine_NameContainingIgnoreCase(search);
+        } else {
+            medicines = inventoryItemRepository.findAll();
+        }
+
+        if (type != null && !type.isBlank()) {
+            if ("BEBAS".equalsIgnoreCase(type)) {
+                medicines = medicines.stream()
+                        .filter(item -> !item.getMedicine().isRequiresPrescription())
+                        .toList();
+            } else if ("RESEP".equalsIgnoreCase(type)) {
+                medicines = medicines.stream()
+                        .filter(item -> item.getMedicine().isRequiresPrescription())
+                        .toList();
+            }
+        }
+
+        if (sort != null) {
+            if ("price-asc".equals(sort)) {
+                medicines = medicines.stream()
+                        .sorted(Comparator.comparingDouble(InventoryItem::getPrice))
+                        .toList();
+            } else if ("price-desc".equals(sort)) {
+                medicines = medicines.stream()
+                        .sorted(Comparator.comparingDouble(InventoryItem::getPrice).reversed())
+                        .toList();
+            } else if ("name-asc".equals(sort)) {
+                medicines = medicines.stream()
+                        .sorted(Comparator.comparing(item -> item.getMedicine().getName(), String.CASE_INSENSITIVE_ORDER))
+                        .toList();
+            }
+        }
+
+        model.addAttribute("medicines", medicines);
+        model.addAttribute("search", search);
+        model.addAttribute("type", type);
+        model.addAttribute("sort", sort);
+        model.addAttribute("totalPages", 1);
+        model.addAttribute("currentPage", 1);
+        setActiveSection(model, "medicines");
+
+        return "customer/medicines";
+    }
+
+    @PostMapping("/cart/add")
+    public String addToCart(
+            HttpSession session,
+            @RequestParam Long medicineId,
+            @RequestParam(defaultValue = "1") int quantity
+    ) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Customer customer = optionalCustomer.get();
+        Optional<InventoryItem> optionalItem = inventoryItemRepository.findById(medicineId);
+        if (optionalItem.isEmpty()) {
+            return "redirect:/customer/medicines";
+        }
+
+        InventoryItem inventoryItem = optionalItem.get();
+
+        Optional<CartItem> optionalCartItem = cartItemRepository.findByCustomerUserIdAndInventoryItemMedicineMedicineId(customer.getUserId(), medicineId);
+        CartItem cartItem = optionalCartItem.orElseGet(() -> new CartItem(customer, inventoryItem, 0));
+        cartItem.setQuantity(cartItem.getQuantity() + quantity);
+        cartItemRepository.save(cartItem);
+
+        return "redirect:/customer/cart";
+    }
+
+    @GetMapping("/cart")
+    public String showCart(HttpSession session, Model model) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Customer customer = optionalCustomer.get();
+        List<CartItem> cartItems = cartItemRepository.findByCustomerUserId(customer.getUserId());
+        double subtotal = cartItems.stream().mapToDouble(CartItem::getSubtotal).sum();
+        boolean hasPrescription = cartItems.stream()
+                .anyMatch(item -> item.getInventoryItem().getMedicine().isRequiresPrescription());
+
+        model.addAttribute("cartItems", cartItems);
+        model.addAttribute("subtotal", subtotal);
+        model.addAttribute("adminFee", 2500);
+        model.addAttribute("hasItemsRequiringPrescription", hasPrescription);
+        setActiveSection(model, "cart");
+
+        return "customer/cart";
+    }
+
+    @PostMapping("/cart/update/{id}")
+    public String updateCartItem(
+            HttpSession session,
+            @PathVariable Long id,
+            @RequestParam String action
+    ) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Optional<CartItem> optionalCartItem = cartItemRepository.findById(id);
+        if (optionalCartItem.isPresent()) {
+            CartItem cartItem = optionalCartItem.get();
+            if (!customerOwnsItem(optionalCustomer.get(), cartItem)) {
+                return "redirect:/customer/cart";
+            }
+
+            if ("increase".equals(action)) {
+                cartItem.setQuantity(cartItem.getQuantity() + 1);
+            } else if ("decrease".equals(action) && cartItem.getQuantity() > 1) {
+                cartItem.setQuantity(cartItem.getQuantity() - 1);
+            }
+            cartItemRepository.save(cartItem);
+        }
+
+        return "redirect:/customer/cart";
+    }
+
+    @PostMapping("/cart/remove/{id}")
+    public String removeCartItem(HttpSession session, @PathVariable Long id) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Optional<CartItem> optionalCartItem = cartItemRepository.findById(id);
+        if (optionalCartItem.isPresent()) {
+            CartItem cartItem = optionalCartItem.get();
+            if (customerOwnsItem(optionalCustomer.get(), cartItem)) {
+                cartItemRepository.delete(cartItem);
+            }
+        }
+
+        return "redirect:/customer/cart";
+    }
+
+    @GetMapping("/checkout")
+    public String showCheckout(HttpSession session, Model model) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Customer customer = optionalCustomer.get();
+        List<CartItem> cartItems = cartItemRepository.findByCustomerUserId(customer.getUserId());
+        if (cartItems.isEmpty()) {
+            return "redirect:/customer/cart";
+        }
+
+        double subtotal = cartItems.stream().mapToDouble(CartItem::getSubtotal).sum();
+        model.addAttribute("checkoutForm", new CheckoutForm());
+        model.addAttribute("orderItems", cartItems);
+        model.addAttribute("subtotal", subtotal);
+        model.addAttribute("shippingFee", 10000);
+        model.addAttribute("adminFee", 2500);
+        model.addAttribute("totalAmount", subtotal + 10000 + 2500);
+        setActiveSection(model, "cart");
+
+        return "customer/checkout";
+    }
+
+    @PostMapping("/checkout")
+    public String placeOrder(HttpSession session, @ModelAttribute CheckoutForm checkoutForm) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Customer customer = optionalCustomer.get();
+        List<CartItem> cartItems = cartItemRepository.findByCustomerUserId(customer.getUserId());
+        if (cartItems.isEmpty()) {
+            return "redirect:/customer/cart";
+        }
+
+        Order order = new Order(customer);
+        order.setRecipientName(checkoutForm.getRecipientName());
+        order.setRecipientPhone(checkoutForm.getRecipientPhone());
+        order.setDeliveryAddress(checkoutForm.getDeliveryAddress());
+        order.setDeliveryMethod(checkoutForm.getDeliveryMethod() != null ? checkoutForm.getDeliveryMethod() : DeliveryMethod.REGULAR);
+        order.setPaymentMethod(checkoutForm.getPaymentMethod() != null ? checkoutForm.getPaymentMethod() : PaymentMethod.COD);
+        order.setPaymentStatus(PaymentStatus.PENDING);
+
+        for (CartItem cartItem : cartItems) {
+            InventoryItem inventoryItem = cartItem.getInventoryItem();
+            order.addItem(new OrderItem(
+                    inventoryItem.getMedicine().getName(),
+                    inventoryItem.getPharmacy().getName(),
+                    cartItem.getQuantity(),
+                    inventoryItem.getPrice(),
+                    inventoryItem.getMedicine().isRequiresPrescription()
+            ));
+        }
+        order.setShippingFee(10000);
+        order.setAdminFee(2500);
+        order.setTotalAmount(order.getSubtotal() + order.getShippingFee() + order.getAdminFee());
+        orderRepository.save(order);
+        cartItemRepository.deleteByCustomerUserId(customer.getUserId());
+
+        return "redirect:/customer/orders";
+    }
+
+    @GetMapping("/orders")
+    public String showOrders(HttpSession session, Model model, @RequestParam(required = false) String status) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Customer customer = optionalCustomer.get();
+        List<Order> orders;
+        if (status != null && !status.isBlank()) {
+            try {
+                orders = orderRepository.findByCustomerUserIdAndStatusOrderByCreatedAtDesc(customer.getUserId(), OrderStatus.valueOf(status));
+            } catch (IllegalArgumentException ex) {
+                orders = orderRepository.findByCustomerUserIdOrderByCreatedAtDesc(customer.getUserId());
+            }
+        } else {
+            orders = orderRepository.findByCustomerUserIdOrderByCreatedAtDesc(customer.getUserId());
+        }
+
+        model.addAttribute("orders", orders);
+        model.addAttribute("status", status);
+        setActiveSection(model, "orders");
+
+        return "customer/orders";
+    }
+
+    @GetMapping("/orders/{id}")
+    public String showOrderDetail(HttpSession session, Model model, @PathVariable Long id) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Optional<Order> optionalOrder = orderRepository.findById(id);
+        if (optionalOrder.isEmpty() || !optionalOrder.get().getCustomer().getUserId().equals(optionalCustomer.get().getUserId())) {
+            return "redirect:/customer/orders";
+        }
+
+        model.addAttribute("order", optionalOrder.get());
+        setActiveSection(model, "orders");
+        return "customer/order-detail";
+    }
+
+    @GetMapping("/consultations")
+    public String showConsultations(HttpSession session, Model model, @RequestParam(required = false) String status) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Customer customer = optionalCustomer.get();
+        List<Consultation> consultations;
+        if (status != null && !status.isBlank()) {
+            try {
+                consultations = consultationRepository.findByCustomerUserIdAndStatusOrderByCreatedAtDesc(
+                        customer.getUserId(), ConsultationStatus.valueOf(status));
+            } catch (IllegalArgumentException ex) {
+                consultations = consultationRepository.findByCustomerUserIdOrderByCreatedAtDesc(customer.getUserId());
+            }
+        } else {
+            consultations = consultationRepository.findByCustomerUserIdOrderByCreatedAtDesc(customer.getUserId());
+        }
+
+        model.addAttribute("consultations", consultations);
+        model.addAttribute("status", status);
+        setActiveSection(model, "consultations");
+        return "customer/consultations";
+    }
+
+    @GetMapping("/consultations/new")
+    public String showConsultationForm(HttpSession session, Model model) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        List<Doctor> availableDoctors = doctorRepository.findAll().stream()
+                .filter(Doctor::isApprovedPartner)
+                .toList();
+
+        model.addAttribute("availableDoctors", availableDoctors);
+        model.addAttribute("consultationForm", new ConsultationForm());
+        setActiveSection(model, "consultations");
+        return "customer/consultation-new";
+    }
+
+    @PostMapping("/consultations/new")
+    public String submitConsultationForm(HttpSession session, Model model, @ModelAttribute ConsultationForm consultationForm) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Customer customer = optionalCustomer.get();
+        if (consultationForm.getDoctorId() == null || consultationForm.getComplaint() == null || consultationForm.getComplaint().isBlank()) {
+            model.addAttribute("error", "Pilih dokter dan jelaskan keluhan Anda.");
+            model.addAttribute("availableDoctors", doctorRepository.findAll().stream().filter(Doctor::isApprovedPartner).toList());
+            model.addAttribute("consultationForm", consultationForm);
+            return "customer/consultation-new";
+        }
+
+        Optional<Doctor> optionalDoctor = doctorRepository.findById(consultationForm.getDoctorId());
+        if (optionalDoctor.isEmpty()) {
+            model.addAttribute("error", "Dokter tidak ditemukan.");
+            model.addAttribute("availableDoctors", doctorRepository.findAll().stream().filter(Doctor::isApprovedPartner).toList());
+            model.addAttribute("consultationForm", consultationForm);
+            return "customer/consultation-new";
+        }
+
+        Consultation consultation = new Consultation(
+                customer,
+                optionalDoctor.get(),
+                consultationForm.getComplaint(),
+                consultationForm.getAdditionalInfo()
+        );
+        consultationRepository.save(consultation);
+
+        return "redirect:/customer/consultations";
+    }
+
+    @GetMapping("/consultations/{id}")
+    public String showConsultationDetail(HttpSession session, Model model, @PathVariable Long id) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Optional<Consultation> optionalConsultation = consultationRepository.findById(id);
+        if (optionalConsultation.isEmpty() || !optionalConsultation.get().getCustomer().getUserId().equals(optionalCustomer.get().getUserId())) {
+            return "redirect:/customer/consultations";
+        }
+
+        model.addAttribute("consultation", optionalConsultation.get());
+        model.addAttribute("messages", List.of());
+        setActiveSection(model, "consultations");
+        return "customer/consultation-chat";
+    }
+
+    @PostMapping("/consultations/{id}/message")
+    public String sendConsultationMessage(HttpSession session, @PathVariable Long id, @RequestParam String message) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Optional<Consultation> optionalConsultation = consultationRepository.findById(id);
+        if (optionalConsultation.isEmpty() || !optionalConsultation.get().getCustomer().getUserId().equals(optionalCustomer.get().getUserId())) {
+            return "redirect:/customer/consultations";
+        }
+
+        return "redirect:/customer/consultations/" + id;
+    }
+
+    @PostMapping("/consultations/{id}/diagnosis")
+    public String submitConsultationDiagnosis(HttpSession session, @PathVariable Long id, @RequestParam String diagnosis) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Optional<Consultation> optionalConsultation = consultationRepository.findById(id);
+        if (optionalConsultation.isEmpty() || !optionalConsultation.get().getCustomer().getUserId().equals(optionalCustomer.get().getUserId())) {
+            return "redirect:/customer/consultations";
+        }
+
+        Consultation consultation = optionalConsultation.get();
+        consultation.setStatus(ConsultationStatus.COMPLETED);
+        consultationRepository.save(consultation);
+
+        return "redirect:/customer/consultations/" + id;
+    }
+
+    private Optional<Customer> findAuthenticatedCustomer(HttpSession session) {
+        String roleValue = session.getAttribute("currentUserRole") != null
+                ? session.getAttribute("currentUserRole").toString()
+                : null;
+
+        if (!Role.ROLE_CUSTOMER.name().equals(roleValue)) {
+            return Optional.empty();
+        }
+
+        String customerEmail = (String) session.getAttribute("currentUserEmail");
+        if (customerEmail == null) {
+            return Optional.empty();
+        }
+
+        Optional<User> optionalUser = userRepository.findByEmail(customerEmail);
+        if (optionalUser.isEmpty() || !(optionalUser.get() instanceof Customer customer)) {
+            return Optional.empty();
+        }
+
+        return Optional.of(customer);
+    }
+
+    private boolean customerOwnsItem(Customer customer, CartItem cartItem) {
+        return cartItem.getCustomer() != null && cartItem.getCustomer().getUserId().equals(customer.getUserId());
+    }
+
+    @GetMapping("/profile")
+    public String showProfile(HttpSession session, Model model) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Customer customer = optionalCustomer.get();
+        model.addAttribute("profileName", customer.getName());
+        model.addAttribute("profileEmail", customer.getEmail());
+        model.addAttribute("profilePhone", customer.getPhoneNumber());
+        model.addAttribute("profileAddress", customer.getAddress());
+        model.addAttribute("profileHeight", customer.getHeight());
+        model.addAttribute("profileWeight", customer.getWeight());
+        model.addAttribute("profileBirthDate", customer.getBirthDate());
+        model.addAttribute("profileGender", customer.getGender());
+        model.addAttribute("profileMemberSince", customer.getCreatedAt());
+
+        setActiveSection(model, "profile");
+        return "customer/customer-profile";
     }
 }

@@ -1,5 +1,6 @@
 package com.telemedclinic.prescription.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,51 +9,63 @@ import java.util.UUID;
 import com.telemedclinic.user.entity.Customer;
 import com.telemedclinic.user.entity.Doctor;
 
+@Entity
+@Table(name = "prescriptions")
 public class Prescription {
-    private final String prescriptionId;
+    
+    @Id
+    private String prescriptionId;
+
+    // Relasi: Banyak resep bisa dimiliki oleh 1 Dokter
+    @ManyToOne
+    @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor; 
+
+    // Relasi: Banyak resep bisa dimiliki oleh 1 Customer
+    @ManyToOne
+    @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
+
+    // Relasi: 1 Resep punya Banyak Obat (Cascade ALL: Jika resep dihapus, itemnya ikut terhapus)
+    @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PrescriptionItem> items;
+
     private LocalDateTime issuedDate;
     private boolean isUsed;
 
-    // Constructor
+    // Default constructor wajib untuk JPA (Spring Boot)
+    public Prescription() {
+    }
+
+    // Constructor bawaanmu (Logika awal tetap aman)
     public Prescription(Doctor doctor, Customer customer) {
-        // Auto-generate ID unik
         this.prescriptionId = "RX-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         this.doctor = doctor;
         this.customer = customer;
-        
-        // Relasi Komposisi: List item diinisialisasi bersamaan dengan pembuatan resep
         this.items = new ArrayList<>(); 
-        
         this.issuedDate = LocalDateTime.now();
-        this.isUsed = false; // Resep baru pasti belum digunakan
+        this.isUsed = false;
     }
 
-    // --- METHOD UTAMA SESUAI RANCANGAN ---
-
-    // Menambah obat ke dalam resep
+    // --- METHOD UTAMA ---
     public void addItem(PrescriptionItem item) {
+        item.setPrescription(this); // Wajib di-set agar nyambung ke database
         this.items.add(item);
     }
 
-    // Mengembalikan daftar obat dalam resep
     public List<PrescriptionItem> getItems() {
         return items;
     }
 
-    // Cek apakah resep masih valid (belum dipakai dan ada isinya)
     public boolean isValid() {
         return !isUsed && !items.isEmpty();
     }
 
-    // Menandai resep sudah dipakai setelah checkout berhasil
     public void markAsUsed() {
         this.isUsed = true;
     }
 
-    // --- GETTER LAINNYA ---
+    // --- GETTER ---
     public String getPrescriptionId() { return prescriptionId; }
     public Doctor getDoctor() { return doctor; }
     public Customer getCustomer() { return customer; }

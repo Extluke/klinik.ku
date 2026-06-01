@@ -1,6 +1,7 @@
 package com.telemedclinic.prescription.exception;
 
-public class PrescriptionNotFoundException extends Exception {
+// Ubah dari Exception menjadi RuntimeException
+public class PrescriptionNotFoundException extends RuntimeException {
     public PrescriptionNotFoundException(String message) {
         super(message);
     }

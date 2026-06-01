@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- Fragment Navbar Apoteker/Pharmacy -->
+    <nav th:fragment="pharmacistNavbar(activePage)" class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-stone-200 shadow-sm z-50 transition-all">
+        <div class="max-w-screen-2xl mx-auto px-6 py-3 flex justify-between items-center">
+            
+            <!-- Logo Area -->
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-[#FAD5C8] flex items-center justify-center">
+                    <span class="text-[#D53E0F] text-lg">💊</span>
+                </div>
+                <div class="text-xl font-extrabold text-stone-900 tracking-tight hidden sm:block">KlinikKu <span class="text-[#D53E0F]">Apotek</span></div>
+            </div>
+            
+            <!-- Dinamic Navigation Links -->
+            <div class="hidden lg:flex gap-6 items-center">
+                <a th:href="@{/pharmacist/dashboard}" 
+                   class="font-bold pb-1 transition-all"
+                   th:classappend="${activePage == 'dashboard'} ? 'text-[#D53E0F] border-b-2 border-[#D53E0F]' : 'text-stone-500 hover:text-[#D53E0F]'">
+                   Dashboard
+                </a>
+                
+                <a th:href="@{/pharmacist/validasi}" 
+                   class="font-bold pb-1 transition-all"
+                   th:classappend="${activePage == 'validasi'} ? 'text-[#D53E0F] border-b-2 border-[#D53E0F]' : 'text-stone-500 hover:text-[#D53E0F]'">
+                   Validasi Resep
+                </a>
+                
+                <a th:href="@{/pharmacist/tracking}" 
+                   class="font-bold pb-1 transition-all"
+                   th:classappend="${activePage == 'tracking'} ? 'text-[#D53E0F] border-b-2 border-[#D53E0F]' : 'text-stone-500 hover:text-[#D53E0F]'">
+                   Tracking Pesanan
+                </a>
+
+                <a th:href="@{/pharmacist/katalog}" 
+                   class="font-bold pb-1 transition-all"
+                   th:classappend="${activePage == 'katalog'} ? 'text-[#D53E0F] border-b-2 border-[#D53E0F]' : 'text-stone-500 hover:text-[#D53E0F]'">
+                   Katalog Obat
+                </a>
+
+                <a th:href="@{/pharmacist/keuangan}" 
+                   class="font-bold pb-1 transition-all"
+                   th:classappend="${activePage == 'keuangan'} ? 'text-[#D53E0F] border-b-2 border-[#D53E0F]' : 'text-stone-500 hover:text-[#D53E0F]'">
+                   Keuangan
+                </a>
+            </div>
+
+            <!-- Right Area (Toggle & Profile) -->
+            <div class="flex items-center gap-5">
+                <!-- Global Buka/Tutup Apotek Toggle -->
+                <div class="hidden md:flex items-center gap-2 bg-stone-100 px-3 py-1.5 rounded-full border border-stone-200">
+                    <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" id="global-apotek-status" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer checked:right-0 checked:border-green-500 transition-all duration-300" checked/>
+                        <label for="global-apotek-status" class="toggle-label block overflow-hidden h-5 rounded-full bg-green-400 cursor-pointer transition-all duration-300"></label>
+                    </div>
+                    <span class="text-xs font-bold text-stone-700" id="apotek-status-text">Apotek Buka</span>
+                </div>
+
+                <!-- Notifications -->
+                <button class="relative text-stone-500 hover:text-[#D53E0F] transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">8</span>
+                </button>
+
+                <!-- Profile Instansi -->
+                <a th:href="@{/pharmacist/profile}" 
+                   class="flex items-center gap-2 hover:bg-stone-50 p-1.5 rounded-xl transition cursor-pointer"
+                   th:classappend="${activePage == 'profil'} ? 'ring-2 ring-[#D53E0F] ring-offset-2' : ''">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-stone-700 to-stone-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                        MF <!-- Singkatan Medika Farma -->
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const statusToggle = document.getElementById('global-apotek-status');
+                const statusText = document.getElementById('apotek-status-text');
+                if(statusToggle && statusText) {
+                    statusToggle.addEventListener('change', (e) => {
+                        if(e.target.checked) {
+                            statusText.textContent = "Apotek Buka";
+                            statusText.classList.replace("text-stone-400", "text-stone-700");
+                        } else {
+                            statusText.textContent = "Apotek Tutup";
+                            statusText.classList.replace("text-stone-700", "text-stone-400");
+                        }
+                    });
+                }
+            });
+        </script>
+    </nav>
+</body>
+</html>

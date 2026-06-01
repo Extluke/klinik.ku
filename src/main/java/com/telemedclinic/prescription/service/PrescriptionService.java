@@ -1,57 +1,48 @@
 package com.telemedclinic.prescription.service;
 
 import com.telemedclinic.prescription.exception.PrescriptionNotFoundException;
-import com.telemedclinic.medicine.entity.Medicine;
 import com.telemedclinic.prescription.model.Prescription;
-import com.telemedclinic.prescription.model.PrescriptionItem;
+import com.telemedclinic.prescription.repository.PrescriptionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service // Penanda wajib agar Spring Boot tahu ini adalah "Otak" utama
 public class PrescriptionService {
 
-    /**
-     * Mengecek apakah resep masih valid (belum kedaluwarsa/belum dipakai).
-     */
-    public boolean validatePrescription(Prescription p) throws PrescriptionNotFoundException {
-        if (p == null) {
-            throw new PrescriptionNotFoundException("Resep tidak valid: Resep tidak ditemukan (null).");
-        }
-        
-        // Memanggil method isValid() yang sudah kamu buat kemarin di class Prescription
-        return p.isValid();
+    // Memanggil jembatan database yang tadi kamu buat
+    private final PrescriptionRepository prescriptionRepository;
+
+    @Autowired
+    public PrescriptionService(PrescriptionRepository prescriptionRepository) {
+        this.prescriptionRepository = prescriptionRepository;
     }
 
-    /**
-     * Mengecek apakah obat keras yang ingin dibeli benar-benar tercantum di dalam resep dokter.
-     */
-    public boolean isMedicineInPrescription(Prescription p, Medicine m) throws PrescriptionNotFoundException {
-        // 1. Pastikan resepnya valid terlebih dahulu
-        if (!validatePrescription(p)) {
-            return false;
-        }
-
-        // 2. Looping untuk mencari apakah ID obat ada di dalam daftar item resep
-        for (PrescriptionItem item : p.getItems()) {
-            if (item.getMedicine().getMedicineId().equals(m.getMedicineId())) {
-                return true; // Obat ditemukan di dalam resep
-            }
-        }
-        
-        // Jika looping selesai dan tidak ditemukan
-        return false;
+    // 1. Fitur untuk DOKTER: Menyimpan resep baru ke database
+    public Prescription createPrescription(Prescription prescription) {
+        return prescriptionRepository.save(prescription);
     }
 
-    /**
-     * Menandai resep sudah digunakan setelah proses checkout berhasil.
-     */
-    public void markAsUsed(Prescription p) throws PrescriptionNotFoundException {
-        if (p == null) {
-            throw new PrescriptionNotFoundException("Gagal menandai resep: Resep tidak ditemukan.");
+    // 2. Fitur PENJAGA GAWANG: Mencari resep di database
+    public Prescription getPrescriptionById(String prescriptionId) {
+        // Coba cari resepnya. Kalau tidak ketemu, langsung lempar Exception buatanmu!
+        return prescriptionRepository.findById(prescriptionId)
+                .orElseThrow(() -> new PrescriptionNotFoundException("Resep dengan ID " + prescriptionId + " tidak ditemukan atau tidak valid!"));
+    }
+
+    // 3. Fitur untuk CUSTOMER/APOTEK: Menebus resep
+    public Prescription redeemPrescription(String prescriptionId) {
+        // Cari resepnya (otomatis melewati penjaga gawang di atas)
+        Prescription prescription = getPrescriptionById(prescriptionId);
+        
+        // Cek apakah resep sudah pernah dipakai
+        if (prescription.isUsed()) {
+            throw new IllegalStateException("Gagal! Resep ini sudah pernah ditebus sebelumnya.");
         }
         
-        if (p.isUsed()) {
-            throw new IllegalStateException("Gagal: Resep ini sudah pernah digunakan sebelumnya.");
-        }
+        // Tandai resep sudah dipakai
+        prescription.markAsUsed();
         
-        // Memanggil method markAsUsed() dari domain layer
-        p.markAsUsed();
+        // Simpan perubahan statusnya ke database
+        return prescriptionRepository.save(prescription);
     }
 }

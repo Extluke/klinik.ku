@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Pesanan - KlinikKu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-900">
+    <div class="flex">
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/sidebar-customer :: sidebar}"></div>
+
+        <!-- Main Content -->
+        <div class="flex-1">
+            <div class="p-8">
+                <!-- Page Header -->
+                <div class="mb-8">
+                    <h1 class="text-4xl font-bold text-stone-900 mb-2">Riwayat Pesanan</h1>
+                    <p class="text-stone-600">Lihat dan kelola semua pesanan Anda</p>
+                </div>
+
+                <!-- Tab Navigation -->
+                <div class="bg-white rounded-2xl border border-stone-200 mb-8 overflow-x-auto">
+                    <div class="flex">
+                        <a th:href="@{/customer/orders}" 
+                           class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap"
+                           th:classappend="${status == null || status == ''} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
+                            Semua
+                        </a>
+                        <a th:href="@{/customer/orders(status=PENDING)}" 
+                           class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap"
+                           th:classappend="${status == 'PENDING'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
+                            Menunggu
+                        </a>
+                        <a th:href="@{/customer/orders(status=PROCESSING)}" 
+                           class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap"
+                           th:classappend="${status == 'PROCESSING'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
+                            Diproses
+                        </a>
+                        <a th:href="@{/customer/orders(status=SHIPPED)}" 
+                           class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap"
+                           th:classappend="${status == 'SHIPPED'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
+                            Dikirim
+                        </a>
+                        <a th:href="@{/customer/orders(status=COMPLETED)}" 
+                           class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap"
+                           th:classappend="${status == 'COMPLETED'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
+                            Selesai
+                        </a>
+                        <a th:href="@{/customer/orders(status=CANCELLED)}" 
+                           class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap"
+                           th:classappend="${status == 'CANCELLED'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
+                            Dibatalkan
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Orders List -->
+                <div class="space-y-4 mb-8">
+                    <div th:each="order : ${orders}" 
+                         class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm hover:shadow-md transition">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold text-stone-900 mb-1" th:text="${order.orderId}">ORD-0001</h3>
+                                <p class="text-sm text-stone-600" th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy HH:mm')}">
+                                    01 Jan 2026 14:30
+                                </p>
+                            </div>
+                            <span th:replace="~{fragments/status-badges :: order-status(${order.status})}"></span>
+                        </div>
+
+                        <!-- Order Items Preview -->
+                        <div class="mb-4 pb-4 border-b border-stone-200">
+                            <div th:each="item : ${order.items}" th:if="${#lists.size(order.items) > 0}" class="flex justify-between items-center py-2">
+                                <div>
+                                    <p class="font-medium text-stone-900 text-sm" th:text="${item.medicineName}">Paracetamol</p>
+                                    <p class="text-xs text-stone-500" th:text="${'Qty: ' + item.quantity}">Qty: 2</p>
+                                </div>
+                                <p class="font-semibold text-stone-900" 
+                                   th:text="${'Rp ' + #numbers.formatInteger(item.subtotal, 0, 'COMMA')}">
+                                    Rp 25.000
+                                </p>
+                            </div>
+                            <p th:if="${#lists.size(order.items) > 3}" class="text-sm text-stone-600 font-semibold py-2">
+                                <span th:text="${#lists.size(order.items) - 3} + ' item lainnya'"></span>
+                            </p>
+                        </div>
+
+                        <!-- Order Total & Action -->
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-stone-600">Total</p>
+                                <p class="text-2xl font-bold text-orange-500" 
+                                   th:text="${'Rp ' + #numbers.formatInteger(order.totalAmount, 0, 'COMMA')}">
+                                    Rp 50.000
+                                </p>
+                            </div>
+                            <a th:href="@{/customer/orders/{id}(id=${order.id})}" 
+                               class="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-semibold">
+                                Lihat Detail
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div th:if="${#lists.isEmpty(orders)}" class="bg-white rounded-2xl border border-stone-200 p-12 text-center">
+                        <svg class="w-24 h-24 mx-auto text-stone-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                        </svg>
+                        <p class="text-stone-600 text-lg font-semibold mb-4">Belum ada pesanan</p>
+                        <a th:href="@{/customer/medicines}" 
+                           class="text-orange-600 font-semibold hover:underline">
+                            Mulai berbelanja sekarang
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

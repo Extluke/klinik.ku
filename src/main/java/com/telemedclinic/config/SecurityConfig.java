@@ -51,7 +51,9 @@ public class SecurityConfig {
     ) {
 
         HttpSession session = context.getRequest().getSession(false);
-        boolean granted = session != null && requiredRole.equals(session.getAttribute("currentUserRole"));
+        boolean granted = session != null
+                && session.getAttribute("currentUserRole") != null
+                && requiredRole.name().equals(session.getAttribute("currentUserRole").toString());
 
         return new AuthorizationDecision(granted);
     }
