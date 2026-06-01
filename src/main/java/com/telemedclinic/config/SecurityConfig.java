@@ -1,6 +1,7 @@
 package com.telemedclinic.config;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,11 +18,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(csrf -> csrf.disable())
+                // .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
                                 "/auth/**",
+                                "/auth/change-password",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**"
@@ -30,16 +32,37 @@ public class SecurityConfig {
                                 (authentication, context) -> hasSessionRole(context, Role.ROLE_ADMIN)
                         )
                         .requestMatchers("/pharmacist/**").access(
-                                (authentication, context) -> hasSessionRole(context, Role.ROLE_PHARMACIST)
+                                (authentication, context) -> hasPharmacistAccess(context)
                         )
                         .requestMatchers("/customer/**").access(
                                 (authentication, context) -> hasSessionRole(context, Role.ROLE_CUSTOMER)
                         )
                         .requestMatchers("/doctor/**").access(
-                                (authentication, context) -> hasSessionRole(context, Role.ROLE_DOCTOR)
+                                (authentication, context) -> hasDoctorAccess(context)
                         )
                         .anyRequest().permitAll()
                 )
+                .exceptionHandling(exception -> exception.accessDeniedHandler((request, response, accessDeniedException) -> {
+                    HttpSession session = request.getSession(false);
+
+                    if (request.getRequestURI().startsWith("/doctor/")
+                            && session != null
+                            && Role.ROLE_DOCTOR.equals(session.getAttribute("currentUserRole"))
+                            && Boolean.TRUE.equals(session.getAttribute("mustChangePassword"))) {
+                        response.sendRedirect("/auth/change-password");
+                        return;
+                    }
+
+                    if (request.getRequestURI().startsWith("/pharmacist/")
+                            && session != null
+                            && Role.ROLE_PHARMACIST.equals(session.getAttribute("currentUserRole"))
+                            && Boolean.TRUE.equals(session.getAttribute("mustChangePassword"))) {
+                        response.sendRedirect("/auth/change-password");
+                        return;
+                    }
+
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                }))
                 .formLogin(form -> form.disable())
                 .logout(logout -> logout.disable())
                 .build();
@@ -54,6 +77,24 @@ public class SecurityConfig {
         boolean granted = session != null
                 && session.getAttribute("currentUserRole") != null
                 && requiredRole.name().equals(session.getAttribute("currentUserRole").toString());
+
+        return new AuthorizationDecision(granted);
+    }
+
+    private AuthorizationDecision hasDoctorAccess(RequestAuthorizationContext context) {
+        HttpSession session = context.getRequest().getSession(false);
+        boolean granted = session != null
+                && Role.ROLE_DOCTOR.equals(session.getAttribute("currentUserRole"))
+                && !Boolean.TRUE.equals(session.getAttribute("mustChangePassword"));
+
+        return new AuthorizationDecision(granted);
+    }
+
+    private AuthorizationDecision hasPharmacistAccess(RequestAuthorizationContext context) {
+        HttpSession session = context.getRequest().getSession(false);
+        boolean granted = session != null
+                && Role.ROLE_PHARMACIST.equals(session.getAttribute("currentUserRole"))
+                && !Boolean.TRUE.equals(session.getAttribute("mustChangePassword"));
 
         return new AuthorizationDecision(granted);
     }

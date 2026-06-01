@@ -1,7 +1,6 @@
 package com.telemedclinic.customer.controller;
 
 import jakarta.servlet.http.HttpSession;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -74,10 +73,11 @@ public class CustomerController {
     @ModelAttribute
     public void addCommonAttributes(HttpSession session, Model model) {
         findAuthenticatedCustomer(session).ifPresent(customer -> {
-            model.addAttribute("customer", Map.of(
-                    "name", customer.getName(),
-                    "email", customer.getEmail()
-            ));
+            Map<String, String> customerInfo = new java.util.HashMap<>();
+            customerInfo.put("name", customer.getName() != null ? customer.getName() : "Pengguna");
+            customerInfo.put("email", customer.getEmail() != null ? customer.getEmail() : "-");
+            
+            model.addAttribute("customer", customerInfo);
             model.addAttribute("cartCount", cartItemRepository.countByCustomerUserId(customer.getUserId()));
         });
     }

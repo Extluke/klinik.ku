@@ -1,165 +1,273 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Konsultasi Chat - KlinikKu</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        #messages-container { scroll-behavior: smooth; }
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+      #messages-container {
+        scroll-behavior: smooth;
+      }
     </style>
-</head>
-<body class="bg-stone-50 text-stone-900 flex flex-col h-screen">
-    <!-- Header -->
-    <div class="bg-white border-b border-stone-200 sticky top-0 z-40 px-6 py-4 shadow-sm">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <a th:href="@{/customer/consultations}" class="text-orange-600 hover:text-orange-700 font-semibold">
-                    ←
-                </a>
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                        <span class="font-bold text-orange-600">DR</span>
-                    </div>
-                    <div>
-                        <h2 class="font-bold text-stone-900" th:text="${consultation.doctorName}">Dr. Ahmad</h2>
-                        <p class="text-sm text-stone-600" th:text="${consultation.doctorSpecialization}">Dokter Umum</p>
-                    </div>
-                </div>
-            </div>
+  </head>
+  <body class="bg-stone-50 text-stone-900 flex flex-col h-screen">
+    <!-- Navbar -->
+    <div
+      th:replace="~{fragments/customer-navbar :: customerNavbar('consultations')}"
+    ></div>
 
-            <div class="flex items-center gap-4">
-                <span th:replace="~{fragments/status-badges :: consultation-status(${consultation.status})}"></span>
-                <div th:if="${#authentication.principal.username == consultation.doctorId && consultation.status == 'IN_PROGRESS'}"
-                     class="relative group">
-                    <button type="button" class="text-orange-600 hover:text-orange-700 font-semibold text-sm px-4 py-2 bg-orange-50 rounded-lg">
-                        Menu ▼
-                    </button>
-                    <div class="hidden group-hover:block absolute right-0 mt-2 w-48 bg-white border border-stone-200 rounded-lg shadow-lg z-50">
-                        <button type="button" onclick="openDiagnosisModal()" 
-                                class="w-full text-left px-4 py-3 hover:bg-orange-50 transition border-b border-stone-200">
-                            <span class="font-semibold">📋 Buat Diagnosis & Resep</span>
-                        </button>
-                        <button type="button" onclick="endConsultation()" 
-                                class="w-full text-left px-4 py-3 hover:bg-red-50 transition text-red-600 font-semibold">
-                            ✓ Selesaikan Konsultasi
-                        </button>
-                    </div>
-                </div>
+    <!-- Header -->
+    <div
+      class="bg-white border-b border-stone-200 sticky top-20 z-40 px-6 py-4 shadow-sm"
+    >
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <a
+            th:href="@{/customer/consultations}"
+            class="text-orange-600 hover:text-orange-700 font-semibold"
+          >
+            ←
+          </a>
+          <div class="flex items-center gap-3">
+            <div
+              class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"
+            >
+              <span class="font-bold text-orange-600">DR</span>
             </div>
+            <div>
+              <h2
+                class="font-bold text-stone-900"
+                th:text="${consultation.doctorName}"
+              >
+                Dr. Ahmad
+              </h2>
+              <p
+                class="text-sm text-stone-600"
+                th:text="${consultation.doctorSpecialization}"
+              >
+                Dokter Umum
+              </p>
+            </div>
+          </div>
         </div>
+
+        <div class="flex items-center gap-4">
+          <span
+            th:replace="~{fragments/status-badges :: consultation-status(${consultation.status})}"
+          ></span>
+          <div
+            th:if="${#authentication.principal.username == consultation.doctorId && consultation.status == 'IN_PROGRESS'}"
+            class="relative group"
+          >
+            <button
+              type="button"
+              class="text-orange-600 hover:text-orange-700 font-semibold text-sm px-4 py-2 bg-orange-50 rounded-lg"
+            >
+              Menu ▼
+            </button>
+            <div
+              class="hidden group-hover:block absolute right-0 mt-2 w-48 bg-white border border-stone-200 rounded-lg shadow-lg z-50"
+            >
+              <button
+                type="button"
+                onclick="openDiagnosisModal()"
+                class="w-full text-left px-4 py-3 hover:bg-orange-50 transition border-b border-stone-200"
+              >
+                <span class="font-semibold">📋 Buat Diagnosis & Resep</span>
+              </button>
+              <button
+                type="button"
+                onclick="endConsultation()"
+                class="w-full text-left px-4 py-3 hover:bg-red-50 transition text-red-600 font-semibold"
+              >
+                ✓ Selesaikan Konsultasi
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Messages Container -->
     <div id="messages-container" class="flex-1 overflow-y-auto p-6 space-y-4">
-        <div th:each="message : ${messages}"
-             th:classappend="${message.senderId == #authentication.principal.username} ? 'flex justify-end' : 'flex justify-start'"
-             class="flex">
-            <div th:classappend="${message.senderId == #authentication.principal.username} ? 'bg-orange-500 text-white' : 'bg-stone-200 text-stone-900'"
-                 class="max-w-xs lg:max-w-md px-4 py-3 rounded-2xl break-words">
-                <p th:text="${message.content}">Pesan di sini</p>
-                <p th:classappend="${message.senderId == #authentication.principal.username} ? 'text-orange-100' : 'text-stone-600'"
-                   class="text-xs mt-1" th:text="${#temporals.format(message.createdAt, 'HH:mm')}">
-                    14:30
-                </p>
-            </div>
+      <div
+        th:each="message : ${messages}"
+        th:classappend="${message.senderId == #authentication.principal.username} ? 'flex justify-end' : 'flex justify-start'"
+        class="flex"
+      >
+        <div
+          th:classappend="${message.senderId == #authentication.principal.username} ? 'bg-orange-500 text-white' : 'bg-stone-200 text-stone-900'"
+          class="max-w-xs lg:max-w-md px-4 py-3 rounded-2xl break-words"
+        >
+          <p th:text="${message.content}">Pesan di sini</p>
+          <p
+            th:classappend="${message.senderId == #authentication.principal.username} ? 'text-orange-100' : 'text-stone-600'"
+            class="text-xs mt-1"
+            th:text="${#temporals.format(message.createdAt, 'HH:mm')}"
+          >
+            14:30
+          </p>
         </div>
+      </div>
     </div>
 
     <!-- Input Area -->
     <div class="bg-white border-t border-stone-200 p-6 sticky bottom-0">
-        <form th:action="@{/customer/consultations/{id}/message(id=${consultation.id})}" method="post" class="flex gap-2">
-            <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <input type="text" name="message" required
-                   class="flex-1 px-4 py-3 border border-stone-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
-                   placeholder="Ketik pesan Anda...">
-            <button type="submit" class="px-6 py-3 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition font-semibold">
-                Kirim
-            </button>
-        </form>
+      <form
+        th:action="@{/customer/consultations/{id}/message(id=${consultation.id})}"
+        method="post"
+        class="flex gap-2"
+      >
+        <input
+          type="hidden"
+          name="${_csrf.parameterName}"
+          th:value="${_csrf.token}"
+        />
+        <input
+          type="text"
+          name="message"
+          required
+          class="flex-1 px-4 py-3 border border-stone-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
+          placeholder="Ketik pesan Anda..."
+        />
+        <button
+          type="submit"
+          class="px-6 py-3 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition font-semibold"
+        >
+          Kirim
+        </button>
+      </form>
     </div>
 
     <!-- Diagnosis Modal (for doctor only) -->
-    <div id="diagnosis-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end">
-        <div class="bg-white w-full max-h-96 rounded-t-3xl p-6 overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-stone-900">Diagnosis & Resep</h2>
-                <button type="button" onclick="closeDiagnosisModal()" class="text-stone-600 hover:text-stone-900 text-2xl">
-                    ×
-                </button>
+    <div
+      id="diagnosis-modal"
+      class="hidden fixed inset-0 bg-black/50 z-50 flex items-end"
+    >
+      <div class="bg-white w-full max-h-96 rounded-t-3xl p-6 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-stone-900">Diagnosis & Resep</h2>
+          <button
+            type="button"
+            onclick="closeDiagnosisModal()"
+            class="text-stone-600 hover:text-stone-900 text-2xl"
+          >
+            ×
+          </button>
+        </div>
+
+        <form
+          th:action="@{/customer/consultations/{id}/diagnosis(id=${consultation.id})}"
+          method="post"
+        >
+          <input
+            type="hidden"
+            name="${_csrf.parameterName}"
+            th:value="${_csrf.token}"
+          />
+
+          <!-- Diagnosis -->
+          <div class="mb-6">
+            <label class="block text-sm font-semibold text-stone-900 mb-2"
+              >Diagnosis</label
+            >
+            <textarea
+              name="diagnosis"
+              required
+              class="w-full px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              rows="3"
+              placeholder="Tuliskan diagnosis..."
+            ></textarea>
+          </div>
+
+          <!-- Prescription Items -->
+          <div class="mb-6">
+            <label class="block text-sm font-semibold text-stone-900 mb-3"
+              >Resep Obat</label
+            >
+            <div id="prescriptions-list" class="space-y-4 mb-4">
+              <div class="border border-stone-300 rounded-lg p-4">
+                <input
+                  type="text"
+                  name="prescriptions[0].medicineName"
+                  placeholder="Nama Obat"
+                  required
+                  class="w-full px-3 py-2 border border-stone-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+                <input
+                  type="text"
+                  name="prescriptions[0].dosage"
+                  placeholder="Dosis (contoh: 3x sehari 1 tablet)"
+                  required
+                  class="w-full px-3 py-2 border border-stone-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+                <textarea
+                  name="prescriptions[0].instructions"
+                  placeholder="Instruksi penggunaan"
+                  class="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  rows="2"
+                ></textarea>
+              </div>
             </div>
 
-            <form th:action="@{/customer/consultations/{id}/diagnosis(id=${consultation.id})}" method="post">
-                <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button
+              type="button"
+              onclick="addPrescription()"
+              class="text-orange-600 hover:text-orange-700 font-semibold text-sm"
+            >
+              + Tambah Obat
+            </button>
+          </div>
 
-                <!-- Diagnosis -->
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-stone-900 mb-2">Diagnosis</label>
-                    <textarea name="diagnosis" required
-                              class="w-full px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                              rows="3"
-                              placeholder="Tuliskan diagnosis..."></textarea>
-                </div>
-
-                <!-- Prescription Items -->
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-stone-900 mb-3">Resep Obat</label>
-                    <div id="prescriptions-list" class="space-y-4 mb-4">
-                        <div class="border border-stone-300 rounded-lg p-4">
-                            <input type="text" name="prescriptions[0].medicineName" placeholder="Nama Obat" required
-                                   class="w-full px-3 py-2 border border-stone-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <input type="text" name="prescriptions[0].dosage" placeholder="Dosis (contoh: 3x sehari 1 tablet)" required
-                                   class="w-full px-3 py-2 border border-stone-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <textarea name="prescriptions[0].instructions" placeholder="Instruksi penggunaan" 
-                                     class="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                     rows="2"></textarea>
-                        </div>
-                    </div>
-
-                    <button type="button" onclick="addPrescription()" 
-                            class="text-orange-600 hover:text-orange-700 font-semibold text-sm">
-                        + Tambah Obat
-                    </button>
-                </div>
-
-                <!-- Buttons -->
-                <div class="flex gap-4">
-                    <button type="button" onclick="closeDiagnosisModal()"
-                            class="flex-1 px-6 py-3 border border-stone-300 rounded-lg hover:bg-stone-50 transition font-semibold">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold">
-                        ✓ Kirim Diagnosis & Resep
-                    </button>
-                </div>
-            </form>
-        </div>
+          <!-- Buttons -->
+          <div class="flex gap-4">
+            <button
+              type="button"
+              onclick="closeDiagnosisModal()"
+              class="flex-1 px-6 py-3 border border-stone-300 rounded-lg hover:bg-stone-50 transition font-semibold"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold"
+            >
+              ✓ Kirim Diagnosis & Resep
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <script>
-        // Auto scroll to bottom
-        const messagesContainer = document.getElementById('messages-container');
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      // Auto scroll to bottom
+      const messagesContainer = document.getElementById("messages-container");
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-        function openDiagnosisModal() {
-            document.getElementById('diagnosis-modal').classList.remove('hidden');
-        }
+      function openDiagnosisModal() {
+        document.getElementById("diagnosis-modal").classList.remove("hidden");
+      }
 
-        function closeDiagnosisModal() {
-            document.getElementById('diagnosis-modal').classList.add('hidden');
-        }
+      function closeDiagnosisModal() {
+        document.getElementById("diagnosis-modal").classList.add("hidden");
+      }
 
-        let prescriptionCount = 1;
-        function addPrescription() {
-            const prescriptionsList = document.getElementById('prescriptions-list');
-            const newPrescription = document.createElement('div');
-            newPrescription.className = 'border border-stone-300 rounded-lg p-4';
-            newPrescription.innerHTML = `
+      let prescriptionCount = 1;
+      function addPrescription() {
+        const prescriptionsList = document.getElementById("prescriptions-list");
+        const newPrescription = document.createElement("div");
+        newPrescription.className = "border border-stone-300 rounded-lg p-4";
+        newPrescription.innerHTML = `
                 <input type="text" name="prescriptions[${prescriptionCount}].medicineName" placeholder="Nama Obat" required
                        class="w-full px-3 py-2 border border-stone-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
                 <input type="text" name="prescriptions[${prescriptionCount}].dosage" placeholder="Dosis" required
@@ -169,16 +277,19 @@
                          rows="2"></textarea>
                 <button type="button" onclick="this.parentElement.remove()" class="text-red-600 text-sm font-semibold">Hapus</button>
             `;
-            prescriptionsList.appendChild(newPrescription);
-            prescriptionCount++;
-        }
+        prescriptionsList.appendChild(newPrescription);
+        prescriptionCount++;
+      }
 
-        function endConsultation() {
-            if (confirm('Yakin ingin mengakhiri konsultasi ini?')) {
-                fetch('', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                location.reload();
-            }
+      function endConsultation() {
+        if (confirm("Yakin ingin mengakhiri konsultasi ini?")) {
+          fetch("", {
+            method: "POST",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+          });
+          location.reload();
         }
+      }
     </script>
-</body>
+  </body>
 </html>

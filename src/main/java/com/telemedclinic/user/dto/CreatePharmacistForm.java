@@ -25,10 +25,6 @@ public class CreatePharmacistForm {
     @Email(message = "Format email pharmacist tidak valid.")
     private String email;
 
-    @NotBlank(message = "Password pharmacist tidak boleh kosong.")
-    @Size(min = 8, message = "Password minimal 8 karakter.")
-    private String password;
-
     @NotBlank(message = "Nomor HP pharmacist tidak boleh kosong.")
     @Size(min = 8, max = 20, message = "Nomor HP harus terdiri dari 8 sampai 20 karakter.")
     private String phoneNumber;

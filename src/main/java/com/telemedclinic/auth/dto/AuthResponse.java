@@ -8,12 +8,18 @@ public class AuthResponse {
     private String name;
     private String email;
     private Role role;
+    private boolean mustChangePassword;
 
     public AuthResponse(Long userId, String name, String email, Role role) {
+        this(userId, name, email, role, false);
+    }
+
+    public AuthResponse(Long userId, String name, String email, Role role, boolean mustChangePassword) {
         this.userId = userId;
         this.name = name;
         this.email = email;
         this.role = role;
+        this.mustChangePassword = mustChangePassword;
     }
 
     public Long getUserId() {
@@ -30,5 +36,9 @@ public class AuthResponse {
 
     public Role getRole() {
         return role;
+    }
+
+    public boolean isMustChangePassword() {
+        return mustChangePassword;
     }
 }

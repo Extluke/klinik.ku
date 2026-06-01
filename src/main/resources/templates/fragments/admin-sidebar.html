@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="sidebar(activePage)"
+       class="w-64 bg-white border-r border-stone-200 flex flex-col">
+    <!-- Logo -->
+    <div class="px-6 py-6 border-b border-stone-200">
+        <div class="flex items-center gap-3">
+            <i class="ti ti-mood-smile text-2xl text-[#D53E0F]"></i>
+            <span class="text-xl font-bold text-stone-900">KlinikKu</span>
+        </div>
+    </div>
+
+    <!-- Admin Profile -->
+    <div class="px-6 py-4 border-b border-stone-200">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-[#FAD5C8] flex items-center justify-center">
+                <span class="text-sm font-bold text-[#D53E0F]" th:text="${#strings.substring(admin.name, 0, 1)}">A</span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-stone-900 truncate" th:text="${admin.name}">Admin Name</p>
+                <span class="inline-block bg-[#FAD5C8] text-[#D53E0F] text-xs font-semibold px-2 py-0.5 rounded-full">Admin</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <!-- Dashboard -->
+        <a th:href="@{/admin/dashboard}"
+           th:classappend="${activePage == 'dashboard'} ?
+             'bg-[#FDF3F0] text-[#D53E0F] font-semibold border-l-4 border-[#D53E0F]' :
+             'text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F]'"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors">
+            <i class="ti ti-layout-dashboard text-xl"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <!-- Manajemen User Group -->
+        <p class="px-3 py-2 text-xs uppercase font-semibold text-stone-400 tracking-wider">Manajemen User</p>
+
+        <!-- Kelola User -->
+        <a th:href="@{/admin/users}"
+           th:classappend="${activePage == 'users'} ?
+             'bg-[#FDF3F0] text-[#D53E0F] font-semibold border-l-4 border-[#D53E0F]' :
+             'text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F]'"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors">
+            <i class="ti ti-users text-xl"></i>
+            <span>Kelola User</span>
+        </a>
+
+        <!-- Tambah Dokter -->
+        <a th:href="@{/admin/doctors/create}"
+           th:classappend="${activePage == 'add-doctor'} ?
+             'bg-[#FDF3F0] text-[#D53E0F] font-semibold border-l-4 border-[#D53E0F]' :
+             'text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F]'"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors">
+            <i class="ti ti-plus text-xl"></i>
+            <span>Tambah Dokter</span>
+        </a>
+
+        <!-- Tambah Apoteker -->
+        <a th:href="@{/admin/pharmacists/create}"
+           th:classappend="${activePage == 'add-pharmacist'} ?
+             'bg-[#FDF3F0] text-[#D53E0F] font-semibold border-l-4 border-[#D53E0F]' :
+             'text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F]'"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors">
+            <i class="ti ti-plus text-xl"></i>
+            <span>Tambah Apoteker</span>
+        </a>
+
+        <!-- Master Data Group -->
+        <p class="px-3 py-4 mt-4 text-xs uppercase font-semibold text-stone-400 tracking-wider">Master Data</p>
+
+        <!-- Kelola Apotek -->
+        <a th:href="@{/admin/pharmacies}"
+           th:classappend="${activePage == 'pharmacies'} ?
+             'bg-[#FDF3F0] text-[#D53E0F] font-semibold border-l-4 border-[#D53E0F]' :
+             'text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F]'"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors">
+            <i class="ti ti-building-hospital text-xl"></i>
+            <span>Kelola Apotek</span>
+        </a>
+
+        <!-- Tambah Apotek -->
+        <a th:href="@{/admin/pharmacies/create}"
+           th:classappend="${activePage == 'add-pharmacy'} ?
+             'bg-[#FDF3F0] text-[#D53E0F] font-semibold border-l-4 border-[#D53E0F]' :
+             'text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F]'"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors">
+            <i class="ti ti-plus text-xl"></i>
+            <span>Tambah Apotek</span>
+        </a>
+    </nav>
+
+    <!-- Logout Button -->
+    <div class="p-4 border-t border-stone-200">
+        <a th:href="@{/auth/logout}" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-red-50 text-red-600 rounded-lg font-semibold hover:bg-red-100 transition-colors">
+            <i class="ti ti-logout text-xl"></i>
+            <span>Logout</span>
+        </a>
+    </div>
+</aside>
+</body>
+</html>

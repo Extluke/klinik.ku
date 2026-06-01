@@ -13,13 +13,12 @@
     </style>
 </head>
 <body class="bg-stone-50 text-stone-900">
-    <div class="flex">
-        <!-- Sidebar -->
-        <div th:replace="~{fragments/sidebar-customer :: sidebar}"></div>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/customer-navbar :: customerNavbar('orders')}"></div>
 
-        <!-- Main Content -->
-        <div class="flex-1">
-            <div class="p-8">
+    <!-- Main Content -->
+    <div class="pt-20">
+        <div class="p-8">
                 <!-- Page Header -->
                 <div class="mb-8">
                     <a th:href="@{/customer/orders}" class="text-orange-600 hover:text-orange-700 font-semibold mb-4 inline-block">

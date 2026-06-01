@@ -2,9 +2,11 @@ package com.telemedclinic.admin.controller;
 
 import jakarta.validation.Valid;
 
-import java.util.List;
 import java.util.Map;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -13,12 +15,16 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.telemedclinic.user.dto.CreateDoctorForm;
 import com.telemedclinic.user.dto.CreatePharmacistForm;
+import com.telemedclinic.user.entity.User;
 import com.telemedclinic.pharmacy.dto.CreatePharmacyForm;
 import com.telemedclinic.admin.service.AdminService;
+import com.telemedclinic.auth.service.DoctorProvisioningResult;
+import com.telemedclinic.auth.service.PharmacistProvisioningResult;
 
 @Controller
 @RequestMapping("/admin")
@@ -30,72 +36,39 @@ public class AdminController {
         this.adminService = adminService;
     }
 
+    @ModelAttribute("admin")
+    public Map<String, String> adminProfile() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String adminName = "Administrator";
+        String adminEmail = "admin@klinikku.id";
+
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+
+            if (principal instanceof User user) {
+                adminName = user.getName();
+                adminEmail = user.getEmail();
+            } else if (principal instanceof UserDetails userDetails) {
+                adminName = userDetails.getUsername();
+                adminEmail = userDetails.getUsername();
+            } else if (principal instanceof String username && !"anonymousUser".equals(username)) {
+                adminName = username;
+                adminEmail = username;
+            }
+        }
+
+        return Map.of(
+                "name", adminName,
+                "email", adminEmail
+        );
+    }
+
     // Menampilkan halaman dashboard admin.
     @GetMapping("/dashboard")
     public String showDashboard(Model model) {
-        // TODO: ganti dengan data dari SecurityContext setelah autentikasi diimplementasikan.
-        model.addAttribute("admin", Map.of(
-                "name", "Administrator",
-                "email", "admin@klinikku.id"
-        ));
-
-        // TODO: ganti dengan data dari AdminService setelah backend domain admin selesai dibangun.
-        model.addAttribute("stats", Map.of(
-                "totalDoctors", 24,
-                "totalPharmacists", 12,
-                "totalCustomers", 1204,
-                "totalPharmacies", 8,
-                "totalInactiveUsers", 3
-        ));
-
-        model.addAttribute("recentUsers", List.of(
-                Map.of(
-                        "name", "Dr. Ahmad Fauzi",
-                        "email", "ahmad@klinikku.id",
-                        "role", "ROLE_DOCTOR"
-                ),
-                Map.of(
-                        "name", "Apt. Sari Dewi",
-                        "email", "sari@klinikku.id",
-                        "role", "ROLE_PHARMACIST"
-                ),
-                Map.of(
-                        "name", "Budi Santoso",
-                        "email", "budi@gmail.com",
-                        "role", "ROLE_CUSTOMER"
-                ),
-                Map.of(
-                        "name", "Dr. Rina Marlina",
-                        "email", "rina@klinikku.id",
-                        "role", "ROLE_DOCTOR"
-                ),
-                Map.of(
-                        "name", "Hendra Wijaya",
-                        "email", "hendra@gmail.com",
-                        "role", "ROLE_CUSTOMER"
-                )
-        ));
-
-        model.addAttribute("recentPharmacies", List.of(
-                Map.of(
-                        "name", "Apotek Sehat Jaya",
-                        "address", "Jl. Merdeka No.1, Purwokerto",
-                        "phoneNumber", "0281-123456",
-                        "isActive", true
-                ),
-                Map.of(
-                        "name", "Apotek Medika Plus",
-                        "address", "Jl. Sudirman No.5, Purwokerto",
-                        "phoneNumber", "0281-654321",
-                        "isActive", true
-                ),
-                Map.of(
-                        "name", "Apotek Husada",
-                        "address", "Jl. Veteran No.10, Purwokerto",
-                        "phoneNumber", "0281-789012",
-                        "isActive", false
-                )
-        ));
+        model.addAttribute("stats", adminService.getDashboardStats());
+        model.addAttribute("recentUsers", adminService.findRecentMedicalStaffUsers());
+        model.addAttribute("recentPharmacies", adminService.findRecentPharmacies());
 
         return "admin/dashboard";
     }
@@ -104,6 +77,8 @@ public class AdminController {
     @GetMapping("/users")
     public String showUsers(Model model) {
         model.addAttribute("users", adminService.findAllUsers());
+        model.addAttribute("currentPage", 0);
+        model.addAttribute("totalPages", 1);
         return "admin/users";
     }
 
@@ -123,7 +98,7 @@ public class AdminController {
     @GetMapping("/doctors/create")
     public String showCreateDoctorForm(Model model) {
         model.addAttribute("createDoctorForm", new CreateDoctorForm());
-        return "admin/doctors/create";
+        return "admin/create-doctor";
     }
 
     // Memproses form pembuatan akun doctor.
@@ -135,11 +110,56 @@ public class AdminController {
     ) {
 
         if (bindingResult.hasErrors()) {
-            return "admin/doctors/create";
+            return "admin/create-doctor";
         }
 
-        adminService.createDoctor(form);
-        redirectAttributes.addFlashAttribute("successMessage", "Akun doctor berhasil dibuat.");
+        try {
+            DoctorProvisioningResult result = adminService.createDoctor(form);
+
+            if (result.isEmailSent()) {
+                redirectAttributes.addFlashAttribute(
+                        "successMessage",
+                        "Akun dokter berhasil dibuat. Kredensial telah dikirim ke " + form.getEmail() + "."
+                );
+            } else {
+                redirectAttributes.addFlashAttribute(
+                        "warningMessage",
+                        "Akun dokter berhasil dibuat, tetapi email kredensial gagal dikirim. Gunakan tombol Kirim Ulang."
+                );
+            }
+
+            return "redirect:/admin/users";
+
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/doctors/create";
+        }
+    }
+
+    @PostMapping("/doctors/{id}/resend-credentials")
+    public String resendDoctorCredentials(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes
+    ) {
+
+        try {
+            DoctorProvisioningResult result = adminService.resendDoctorCredentials(id);
+
+            if (result.isEmailSent()) {
+                redirectAttributes.addFlashAttribute(
+                        "successMessage",
+                        "Kredensial berhasil dikirim ulang."
+                );
+            } else {
+                redirectAttributes.addFlashAttribute(
+                        "warningMessage",
+                        "Gagal mengirim ulang kredensial. Silakan coba lagi."
+                );
+            }
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
         return "redirect:/admin/users";
     }
 
@@ -148,7 +168,7 @@ public class AdminController {
     public String showCreatePharmacistForm(Model model) {
         model.addAttribute("createPharmacistForm", new CreatePharmacistForm());
         model.addAttribute("pharmacies", adminService.findAllPharmacies());
-        return "admin/pharmacists/create";
+        return "admin/create-pharmacist";
     }
 
     // Memproses form pembuatan akun pharmacist.
@@ -162,18 +182,41 @@ public class AdminController {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("pharmacies", adminService.findAllPharmacies());
-            return "admin/pharmacists/create";
+            return "admin/create-pharmacist";
         }
 
-        adminService.createPharmacist(form);
-        redirectAttributes.addFlashAttribute("successMessage", "Akun pharmacist berhasil dibuat.");
-        return "redirect:/admin/users";
+        try {
+            PharmacistProvisioningResult result = adminService.createPharmacist(form);
+
+            if (result.isEmailSent()) {
+                redirectAttributes.addFlashAttribute(
+                        "successMessage",
+                        "Akun apoteker berhasil dibuat. Kredensial telah dikirim ke " + form.getEmail() + "."
+                );
+            } else {
+                redirectAttributes.addFlashAttribute(
+                        "warningMessage",
+                        "Akun apoteker berhasil dibuat, tetapi email kredensial gagal dikirim."
+                );
+            }
+
+            return "redirect:/admin/users";
+        } catch (RuntimeException exception) {
+            model.addAttribute("pharmacies", adminService.findAllPharmacies());
+            model.addAttribute("errorMessage", exception.getMessage());
+            return "admin/create-pharmacist";
+        }
     }
 
     // Menampilkan semua pharmacy yang terdaftar.
     @GetMapping("/pharmacies")
-    public String showPharmacies(Model model) {
-        model.addAttribute("pharmacies", adminService.findAllPharmacies());
+    public String showPharmacies(
+            @RequestParam(value = "search", required = false) String search,
+            Model model
+    ) {
+
+        model.addAttribute("pharmacies", adminService.findPharmacies(search));
+        model.addAttribute("search", search);
         return "admin/pharmacies";
     }
 
@@ -181,7 +224,7 @@ public class AdminController {
     @GetMapping("/pharmacies/create")
     public String showCreatePharmacyForm(Model model) {
         model.addAttribute("createPharmacyForm", new CreatePharmacyForm());
-        return "admin/pharmacies/create";
+        return "admin/create-pharmacy";
     }
 
     // Memproses form pembuatan pharmacy.
@@ -193,7 +236,7 @@ public class AdminController {
     ) {
 
         if (bindingResult.hasErrors()) {
-            return "admin/pharmacies/create";
+            return "admin/create-pharmacy";
         }
 
         adminService.createPharmacy(form);

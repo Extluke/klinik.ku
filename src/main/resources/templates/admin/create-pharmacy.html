@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Apotek - KlinikKu Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-stone-50">
+<div class="flex min-h-screen">
+
+    <!-- Section: Sidebar -->
+    <!-- Thymeleaf: Admin sidebar fragment dengan active state 'pharmacies' -->
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar('add-pharmacy')}"></aside>
+
+    <!-- Section: Main Content -->
+    <main class="flex-1 bg-[#FDF3F0] overflow-y-auto">
+
+        <!-- Section: Page Header -->
+        <header class="sticky top-0 bg-white border-b border-stone-200 shadow-sm px-8 py-6 z-10">
+            <h1 class="text-2xl font-bold text-stone-900">Tambah Apotek</h1>
+            <p class="text-sm text-stone-500 mt-1">Daftarkan apotek baru yang telah diverifikasi</p>
+        </header>
+
+        <!-- Section: Content -->
+        <div class="p-8">
+            <div class="max-w-4xl mx-auto">
+
+            <!-- Section: Alert Error Global -->
+            <!-- Thymeleaf: Tampilkan error global jika ada -->
+            <div th:if="${errorMessage}"
+                 class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm flex items-center gap-2 mb-6">
+                <i class="ti ti-alert-circle text-base flex-shrink-0"></i>
+                <span th:text="${errorMessage}">Terjadi kesalahan.</span>
+            </div>
+
+            <!-- Section: Alert Success Global -->
+            <!-- Thymeleaf: Tampilkan pesan sukses jika ada -->
+            <div th:if="${successMessage}"
+                 class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm flex items-center gap-2 mb-6">
+                <i class="ti ti-circle-check text-base flex-shrink-0"></i>
+                <span th:text="${successMessage}">Berhasil.</span>
+            </div>
+
+            <!-- Section: Form -->
+            <!-- Thymeleaf: Form binding ke CreatePharmacyForm -->
+            <form th:action="@{/admin/pharmacies/create}"
+                  th:object="${createPharmacyForm}"
+                  method="post"
+                  class="space-y-6">
+
+                <!-- Thymeleaf: CSRF token wajib untuk POST -->
+                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <!-- Section: Card Informasi Apotek & Legal -->
+                <div class="bg-white rounded-2xl shadow-md border border-stone-200 overflow-hidden">
+
+                    <!-- Card Header -->
+                    <div class="px-6 py-4 border-b border-stone-100 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-[#FAD5C8] flex items-center justify-center">
+                            <i class="ti ti-building-hospital text-lg text-[#D53E0F]"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-stone-900 text-sm">Informasi Apotek</h2>
+                            <p class="text-xs text-stone-500">Data identitas, kontak, dan dokumen legal apotek</p>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="px-6 py-6 space-y-5">
+
+                        <!-- Field: Nama Apotek -->
+                        <div>
+                            <label for="name" class="block text-sm font-semibold text-stone-900 mb-1.5">
+                                Nama Apotek <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text"
+                                   id="name"
+                                   th:field="*{name}"
+                                   placeholder="Contoh: Apotek Sehat Sejahtera"
+                                   class="w-full px-4 py-3 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm"
+                                   th:classappend="${#fields.hasErrors('name')} ? 'border-red-400' : ''"/>
+                            <!-- Thymeleaf: Error validasi nama apotek -->
+                            <p th:if="${#fields.hasErrors('name')}"
+                               th:errors="*{name}"
+                               class="text-red-500 text-xs mt-1.5">Error</p>
+                        </div>
+
+                        <!-- Field: Nomor Telepon -->
+                        <div>
+                            <label for="phoneNumber" class="block text-sm font-semibold text-stone-900 mb-1.5">
+                                Nomor Telepon <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text"
+                                   id="phoneNumber"
+                                   th:field="*{phoneNumber}"
+                                   placeholder="Contoh: 021-5551234 atau 0812-3456-7890"
+                                   class="w-full px-4 py-3 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm"
+                                   th:classappend="${#fields.hasErrors('phoneNumber')} ? 'border-red-400' : ''"/>
+                            <!-- Thymeleaf: Error validasi nomor telepon -->
+                            <p th:if="${#fields.hasErrors('phoneNumber')}"
+                               th:errors="*{phoneNumber}"
+                               class="text-red-500 text-xs mt-1.5">Error</p>
+                        </div>
+
+                        <!-- Field: Alamat -->
+                        <div>
+                            <label for="address" class="block text-sm font-semibold text-stone-900 mb-1.5">
+                                Alamat <span class="text-red-500">*</span>
+                            </label>
+                            <textarea id="address"
+                                      th:field="*{address}"
+                                      rows="3"
+                                      placeholder="Masukkan alamat lengkap apotek"
+                                      class="w-full px-4 py-3 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm resize-none"
+                                      th:classappend="${#fields.hasErrors('address')} ? 'border-red-400' : ''"></textarea>
+                            <!-- Thymeleaf: Error validasi alamat -->
+                            <p th:if="${#fields.hasErrors('address')}"
+                               th:errors="*{address}"
+                               class="text-red-500 text-xs mt-1.5">Error</p>
+                        </div>
+
+                        <!-- Divider: Informasi Legal -->
+                        <div class="border-t border-stone-100 pt-5">
+                            <div class="flex items-center gap-2 mb-4">
+                                <i class="ti ti-file-certificate text-stone-400 text-base"></i>
+                                <span class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Informasi Legal</span>
+                            </div>
+
+                            <!-- Field: Nomor Dokumen Legal -->
+                            <div>
+                                <label for="legalDocumentNumber" class="block text-sm font-semibold text-stone-900 mb-1.5">
+                                    Nomor Dokumen Legal <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text"
+                                       id="legalDocumentNumber"
+                                       th:field="*{legalDocumentNumber}"
+                                       placeholder="Contoh: SIA/2024/JKT/001234"
+                                       class="w-full px-4 py-3 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm"
+                                       th:classappend="${#fields.hasErrors('legalDocumentNumber')} ? 'border-red-400' : ''"/>
+                                <!-- Thymeleaf: Error validasi nomor dokumen legal -->
+                                <p th:if="${#fields.hasErrors('legalDocumentNumber')}"
+                                   th:errors="*{legalDocumentNumber}"
+                                   class="text-red-500 text-xs mt-1.5">Error</p>
+                                <p class="text-xs text-stone-400 mt-1.5">
+                                    Masukkan nomor Surat Izin Apotek (SIA) atau dokumen legal lain yang digunakan untuk verifikasi.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Card Lokasi -->
+                <div class="bg-white rounded-2xl shadow-md border border-stone-200 overflow-hidden">
+
+                    <!-- Card Header -->
+                    <div class="px-6 py-4 border-b border-stone-100 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center">
+                            <i class="ti ti-map-pin text-lg text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-stone-900 text-sm">Lokasi</h2>
+                            <p class="text-xs text-stone-500">Koordinat untuk fitur pencarian apotek terdekat</p>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="px-6 py-6">
+
+                        <!-- Helper Text Koordinat -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-start gap-3 mb-5">
+                            <i class="ti ti-info-circle text-blue-500 text-base flex-shrink-0 mt-0.5"></i>
+                            <div class="text-xs text-blue-700">
+                                <p class="font-semibold mb-1">Cara mendapatkan koordinat:</p>
+                                <p>Buka Google Maps, klik kanan pada lokasi apotek, lalu salin koordinat yang muncul dalam format <span class="font-semibold">latitude, longitude</span>.</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                            <!-- Field: Latitude -->
+                            <div>
+                                <label for="latitude" class="block text-sm font-semibold text-stone-900 mb-1.5">
+                                    Latitude <span class="text-red-500">*</span>
+                                </label>
+                                <input type="number"
+                                       id="latitude"
+                                       th:field="*{latitude}"
+                                       placeholder="Contoh: -6.200000"
+                                       step="any"
+                                       min="-90"
+                                       max="90"
+                                       class="w-full px-4 py-3 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm"
+                                       th:classappend="${#fields.hasErrors('latitude')} ? 'border-red-400' : ''"/>
+                                <!-- Thymeleaf: Error validasi latitude -->
+                                <p th:if="${#fields.hasErrors('latitude')}"
+                                   th:errors="*{latitude}"
+                                   class="text-red-500 text-xs mt-1.5">Error</p>
+                                <p class="text-xs text-stone-400 mt-1.5">Rentang: -90 hingga 90</p>
+                            </div>
+
+                            <!-- Field: Longitude -->
+                            <div>
+                                <label for="longitude" class="block text-sm font-semibold text-stone-900 mb-1.5">
+                                    Longitude <span class="text-red-500">*</span>
+                                </label>
+                                <input type="number"
+                                       id="longitude"
+                                       th:field="*{longitude}"
+                                       placeholder="Contoh: 106.816666"
+                                       step="any"
+                                       min="-180"
+                                       max="180"
+                                       class="w-full px-4 py-3 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm"
+                                       th:classappend="${#fields.hasErrors('longitude')} ? 'border-red-400' : ''"/>
+                                <!-- Thymeleaf: Error validasi longitude -->
+                                <p th:if="${#fields.hasErrors('longitude')}"
+                                   th:errors="*{longitude}"
+                                   class="text-red-500 text-xs mt-1.5">Error</p>
+                                <p class="text-xs text-stone-400 mt-1.5">Rentang: -180 hingga 180</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Action Buttons -->
+                <div class="flex items-center justify-end gap-3 pt-2 pb-8">
+                    <!-- Tombol Batal -->
+                    <a th:href="@{/admin/pharmacies}"
+                       class="px-6 py-3 text-sm font-semibold text-stone-600 bg-white border border-stone-200 rounded-xl hover:bg-stone-50 transition-colors">
+                        Batal
+                    </a>
+                    <!-- Tombol Submit -->
+                    <button type="submit"
+                            class="px-6 py-3 text-sm font-semibold text-white bg-[#D53E0F] rounded-xl hover:bg-[#5E0006] transition-colors flex items-center gap-2">
+                        <i class="ti ti-plus text-lg"></i>
+                        Tambah Apotek
+                    </button>
+                </div>
+
+            </form>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

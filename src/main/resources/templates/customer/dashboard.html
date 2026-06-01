@@ -18,8 +18,11 @@
     </style>
   </head>
   <body class="bg-[#FDF3F0]">
-    <!-- Section: Navbar -->
-    <nav class="bg-white border-b border-stone-200 shadow-sm sticky top-0 z-50">
+    <!-- Navbar -->
+    <div th:replace="~{fragments/customer-navbar :: customerNavbar('dashboard')}"></div>
+
+    <!-- Section: Main Content -->
+    <main class="min-h-screen pt-20">
       <div
         th:if="${successMessage}"
         class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
@@ -34,213 +37,10 @@
       >
         <span class="block sm:inline" th:text="${errorMessage}"></span>
       </div>
-      <div class="max-w-7xl mx-auto px-6 py-4">
-        <div class="flex items-center justify-between">
-          <!-- Logo -->
-          <div class="flex items-center">
-            <!-- Medical Icon SVG -->
-            <div
-              class="w-8 h-8 rounded-full bg-[#FAD5C8] flex items-center justify-center"
-            >
-              <svg
-                class="w-5 h-5 text-[#D53E0F]"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                ></path>
-              </svg>
-            </div>
-            <span class="font-bold text-stone-900 text-xl ml-2">KlinikKu</span>
-          </div>
 
-          <!-- Desktop Menu -->
-          <div class="hidden md:flex gap-6 items-center">
-            <a
-              th:href="@{/customer/dashboard}"
-              class="text-sm font-medium text-[#D53E0F] font-semibold border-b-2 border-[#D53E0F] pb-0.5"
-              >Dashboard</a
-            >
-            <a
-              th:href="@{/customer/consultations}"
-              class="text-sm font-medium text-stone-600 hover:text-[#D53E0F] transition-colors"
-              >Konsultasi</a
-            >
-            <a
-              th:href="@{/customer/medicines}"
-              class="text-sm font-medium text-stone-600 hover:text-[#D53E0F] transition-colors"
-              >Beli Obat</a
-            >
-            <a
-              th:href="@{/customer/orders}"
-              class="text-sm font-medium text-stone-600 hover:text-[#D53E0F] transition-colors"
-              >Riwayat Order</a
-            >
-          </div>
 
-          <!-- Profile Dropdown -->
-          <div class="flex items-center gap-3 relative">
-            <!-- Mobile Hamburger -->
-            <button id="mobileMenuBtn" class="md:hidden p-1">
-              <svg
-                class="w-6 h-6 text-stone-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                ></path>
-              </svg>
-            </button>
 
-            <!-- Avatar & Dropdown -->
-            <button
-              id="profileBtn"
-              class="flex items-center gap-2 hover:bg-stone-50 px-2 py-1 rounded-lg transition-colors"
-            >
-              <!-- Avatar -->
-              <div
-                class="w-8 h-8 rounded-full bg-[#FAD5C8] flex items-center justify-center"
-              >
-                <!-- Thymeleaf: Extract initials from customer name -->
-                <span
-                  class="text-xs font-bold text-[#D53E0F]"
-                  th:text="${!#strings.isEmpty(customer.name) ? #strings.substring(customer.name,0,1) : 'B'}"
-                  >B</span
-                >
-              </div>
-              <!-- Name -->
-              <span
-                class="hidden md:block text-sm font-medium text-stone-700"
-                th:text="${customer.name}"
-                >Budi Santoso</span
-              >
-              <!-- Chevron -->
-              <svg
-                class="w-4 h-4 text-stone-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                ></path>
-              </svg>
-            </button>
 
-            <!-- Dropdown Menu -->
-            <div
-              id="dropdownMenu"
-              class="hidden absolute top-full right-0 mt-2 bg-white rounded-xl shadow-lg border border-stone-200 py-2 w-48 z-50"
-            >
-              <a
-                th:href="@{/customer/dashboard}"
-                class="block text-sm text-stone-700 hover:bg-[#FDF3F0] hover:text-[#D53E0F] px-4 py-2 flex items-center gap-2 transition-colors"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  ></path>
-                </svg>
-                Profil Saya
-              </a>
-              <div class="border-t border-stone-100 my-1"></div>
-
-              <form
-                th:action="@{/auth/logout}"
-                method="post"
-                class="w-full m-0 p-0"
-              >
-                <button
-                  type="submit"
-                  class="w-full text-left block text-sm text-red-500 hover:bg-red-50 px-4 py-2 flex items-center gap-2 transition-colors"
-                >
-                  <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    ></path>
-                  </svg>
-                  Keluar
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- Mobile Menu -->
-        <div
-          id="mobileMenu"
-          class="hidden md:hidden mt-4 pb-4 border-t border-stone-200 pt-4"
-        >
-          <a
-            th:href="@{/customer/dashboard}"
-            class="block text-sm font-medium text-[#D53E0F] py-2"
-            >Dashboard</a
-          >
-          <a
-            th:href="@{/customer/consultations}"
-            class="block text-sm font-medium text-stone-600 py-2"
-            >Konsultasi</a
-          >
-          <a
-            th:href="@{/customer/medicines}"
-            class="block text-sm font-medium text-stone-600 py-2"
-            >Beli Obat</a
-          >
-          <a
-            th:href="@{/customer/orders}"
-            class="block text-sm font-medium text-stone-600 py-2"
-            >Riwayat Order</a
-          >
-
-          <div
-            class="border-t border-stone-200 mt-4 pt-4 flex justify-between items-center"
-          >
-            <span
-              class="text-sm font-medium text-stone-700"
-              th:text="${customer.name}"
-              >Budi Santoso</span
-            >
-            <form th:action="@{/auth/logout}" method="post" class="m-0 p-0">
-              <button
-                type="submit"
-                class="bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-red-200 transition-colors"
-              >
-                Keluar
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </nav>
 
     <!-- Section: Main Content -->
     <main class="min-h-screen">

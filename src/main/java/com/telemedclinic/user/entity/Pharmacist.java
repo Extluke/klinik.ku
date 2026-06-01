@@ -6,6 +6,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import java.time.LocalDateTime;
 
 import com.telemedclinic.pharmacy.entity.Pharmacy;
 
@@ -26,6 +27,12 @@ public class Pharmacist extends User {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private PartnerApplicationStatus applicationStatus;
+
+    @Column(nullable = false)
+    private boolean mustChangePassword = true;
+
+    @Column
+    private LocalDateTime credentialSentAt;
 
 
     // No-args constructor for JPA
@@ -54,6 +61,7 @@ public class Pharmacist extends User {
         setLicenseNumber(licenseNumber);
         setPharmacy(pharmacy);
         this.applicationStatus = PartnerApplicationStatus.APPROVED;
+        this.mustChangePassword = true;
     }
 
 
@@ -72,6 +80,14 @@ public class Pharmacist extends User {
 
     public PartnerApplicationStatus getApplicationStatus() {
         return applicationStatus;
+    }
+
+    public boolean isMustChangePassword() {
+        return mustChangePassword;
+    }
+
+    public LocalDateTime getCredentialSentAt() {
+        return credentialSentAt;
     }
 
 
@@ -146,5 +162,21 @@ public class Pharmacist extends User {
 
     public boolean isApprovedPartner() {
         return PartnerApplicationStatus.APPROVED.equals(applicationStatus);
+    }
+
+    public void markCredentialSent() {
+        credentialSentAt = LocalDateTime.now();
+    }
+
+    public void markMustChangePassword() {
+        mustChangePassword = true;
+    }
+
+    public void clearMustChangePassword() {
+        mustChangePassword = false;
+    }
+
+    public boolean hasReceivedCredential() {
+        return credentialSentAt != null;
     }
 }
